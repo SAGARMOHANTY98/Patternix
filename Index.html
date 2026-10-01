@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Patternix: DSA patterns as a game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eaf0f7;--surface:#ffffff;--ink:#14213d;--muted:#5d6987;--line:#d5deeb;--chip:#e3eaf4;--code:#f2f5fa;
+  --primary:#2f5bff;--primary-soft:#e2e9ff;--sun:#ffc93c;--sun-ink:#7a5300;
+  --good:#0f9d63;--good-soft:#d9f4e8;--bad:#e5484d;--bad-soft:#fde4e4;
+  --L:#0f9d9d;--R:#8a4dff;
+  color-scheme:light;box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0c1330;--surface:#141d40;--ink:#eef2ff;--muted:#98a3c7;--line:#26315a;--chip:#1d2750;--code:#0f1736;
+  --primary:#6b8bff;--primary-soft:#1f2b63;--sun:#ffd25c;--sun-ink:#ffd25c;
+  --good:#35d08f;--good-soft:#123b33;--bad:#ff6b70;--bad-soft:#3f1d2a;--L:#35cfcf;--R:#b18cff;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1330;--surface:#141d40;--ink:#eef2ff;--muted:#98a3c7;--line:#26315a;--chip:#1d2750;--code:#0f1736;
+  --primary:#6b8bff;--primary-soft:#1f2b63;--sun:#ffd25c;--sun-ink:#ffd25c;
+  --good:#35d08f;--good-soft:#123b33;--bad:#ff6b70;--bad-soft:#3f1d2a;--L:#35cfcf;--R:#b18cff;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:28px 28px;background-attachment:fixed}
+#app{max-width:540px;margin:0 auto;padding:16px 16px 48px}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.top{display:flex;justify-content:space-between;align-items:center;margin:6px 0 18px}
+.logo{font-weight:800;font-size:26px;letter-spacing:-.03em;display:flex;align-items:center}
+.logo i{font-style:normal;color:var(--primary)}
+.pills{display:flex;gap:8px}
+.pill{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:600;font-size:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:12px}
+h2{font-size:19px;margin:0;letter-spacing:-.01em}
+.sec{font-size:15px;font-weight:600;color:var(--muted);margin:24px 2px 10px}
+.muted{color:var(--muted)} .small{font-size:13px} .center{text-align:center}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.radar{width:100%;max-width:360px;display:block;margin:2px auto}
+.radar .rl{font-size:11px;fill:var(--muted);font-family:"Bricolage Grotesque",sans-serif}
+.radar .rv{font-size:13px;font-weight:800;fill:var(--ink);font-family:"Bricolage Grotesque",sans-serif}
+.mode{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px;transition:transform .12s}
+.mode:active{transform:scale(.98)}
+.micon{font-size:24px;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--primary-soft);flex:none}
+.mode .mt{flex:1}
+.mode b{display:block;font-size:17px}
+.mode small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.go{font-size:26px;color:var(--muted)}
+.tier{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:8px}
+.tier{display:block;width:100%;text-align:left}
+.prow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:12px 2px;border-top:1px solid var(--line)}
+.prow:first-of-type{border-top:none}
+.prow .pn{flex:1;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{font-size:12px;padding:5px 10px;border-radius:999px;background:var(--chip)}
+.badge{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--good-soft);color:var(--good)}
+.badge.lock{background:var(--chip);color:var(--muted)}
+.bar{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:10px;margin-bottom:12px}
+.back{width:42px;height:42px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:24px;line-height:1}
+.title{text-align:center;font-weight:800;font-size:18px}
+.timer{height:10px;background:var(--chip);border-radius:99px;overflow:hidden}
+.timer>div{height:100%;width:100%;background:var(--primary);border-radius:99px}
+.timer>div.low{background:var(--bad)}
+.score{font-weight:800;font-size:24px;text-align:right}
+.label{font-size:13px;color:var(--muted);font-weight:600}
+.ptext{font-size:22px;line-height:1.3;font-weight:600;margin:10px 0 6px;min-height:3.9em;letter-spacing:-.01em}
+.opts{display:grid;gap:10px}
+.grid2{grid-template-columns:1fr 1fr}
+.opt{background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:12px;font-weight:600;font-size:15px;min-height:56px;transition:transform .1s,background .15s}
+.opt:active{transform:scale(.97)}
+.opt.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;text-align:left;font-size:14px}
+.opt.ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.opt.no{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.opt:disabled{cursor:default}
+.combo{text-align:center;height:26px;font-weight:800;color:var(--sun-ink)}
+.combo span{background:var(--sun);color:#3b2a00;padding:2px 10px;border-radius:999px;font-size:14px}
+.code{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:13px;line-height:1.65;background:var(--code);border:1px solid var(--line);border-radius:12px;padding:10px 8px;margin:10px 0;overflow-x:auto;white-space:pre}
+.code .ln{display:block;padding:0 6px;border-radius:5px}
+.code.num{counter-reset:ln}
+.code.num .ln::before{counter-increment:ln;content:counter(ln);display:inline-block;width:1.7em;color:var(--muted);opacity:.7}
+.code .ln.hi{background:var(--primary-soft);box-shadow:inset 3px 0 0 var(--primary)}
+.code .k{color:var(--R);font-weight:600}.code .s{color:var(--good)}.code .n{color:var(--primary)}.code .c{color:var(--muted);font-style:italic}.code .b{color:var(--L)}
+.tag{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;color:#fff;white-space:nowrap}
+.qtext{font-weight:600;font-size:17px;margin:6px 0 2px}
+.primary{background:var(--primary);color:#fff;border-radius:14px;padding:14px 18px;font-weight:700;font-size:16px}
+.ghost{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 16px;font-weight:600}
+.ghost.sm{padding:6px 12px;font-size:13px;border-radius:10px}
+.block{display:block;width:100%;margin-top:12px}
+.actions{display:grid;gap:10px;margin-top:14px}
+.actions .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.big{font-size:76px;font-weight:800;line-height:1;letter-spacing:-.04em;margin:8px 0 4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.stats div{background:var(--chip);border-radius:14px;padding:10px 6px}
+.stats b{display:block;font-size:20px}.stats span{font-size:12px;color:var(--muted)}
+.vs{display:flex;align-items:center;justify-content:space-around;padding:24px 12px}
+.side{display:flex;flex-direction:column;align-items:center;gap:4px}
+.av{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;font-weight:800;font-size:22px;margin-bottom:4px}
+.av.you{background:var(--primary);color:#fff}.av.bot{background:var(--sun);font-size:30px}
+.vsx{font-size:28px;font-weight:800;color:var(--muted)}
+.duelscore{display:flex;justify-content:space-between;align-items:center;font-size:15px}
+.duelscore b{font-size:20px}
+.botline{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin:10px 2px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--muted);animation:pulse 1s infinite}
+.dot.on{background:var(--good);animation:none}.dot.bad{background:var(--bad);animation:none}
+@keyframes pulse{50%{opacity:.3}}
+.fb{margin-top:12px}.fb p{margin:6px 0 0;line-height:1.45}
+.fb.good{border-color:var(--good)}.fb.badc{border-color:var(--bad)}
+.fb.good b{color:var(--good)}.fb.badc b{color:var(--bad)}
+.rounds{display:grid;gap:6px;margin-top:10px}
+.rounds div{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:8px 10px;background:var(--chip);border-radius:10px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface);border:1px solid var(--line);padding:5px;border-radius:14px;margin-bottom:12px}
+.tabs button{padding:10px;border-radius:10px;font-weight:600}
+.tabs button.on{background:var(--primary);color:#fff}
+.target{font-size:16px;margin:10px 0}.target b{font-size:22px}
+.cells{display:flex;gap:6px;justify-content:center;margin:14px 0 4px;overflow-x:auto}
+.cellw{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:34px;max-width:52px}
+.cell{width:100%;aspect-ratio:1;display:grid;place-items:center;font-weight:800;font-size:18px;border-radius:12px;background:var(--chip);border:2px solid transparent;transition:all .2s}
+.cell.act{background:var(--primary-soft);border-color:var(--primary)}
+.cell.dim{opacity:.3}
+.cell.win{background:var(--primary-soft);border-color:var(--primary)}
+.cell.out{border-color:var(--bad);border-style:dashed}
+.cell.in{border-color:var(--good);border-style:dashed;background:var(--good-soft)}
+.ptr{height:20px;font-weight:800;font-size:13px}
+.ptr .L{color:var(--L)}.ptr .R{color:var(--R)}
+.sumline{text-align:center;font-size:15px;margin:6px 0}
+.sumline b{font-size:18px}
+.msg{min-height:44px;font-size:14px;line-height:1.4;margin:8px 0;text-align:center}
+.good{color:var(--good)}.bad{color:var(--bad)}
+.ctrl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ctrl .opt{font-size:14px;padding:10px 6px}
+.labnav{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;margin-bottom:6px;scrollbar-width:none}
+.labnav::-webkit-scrollbar{display:none}
+.labnav button{white-space:nowrap;padding:8px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-weight:600;font-size:13px}
+.labnav button.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.viz{margin-top:6px}
+.kvs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0}
+.kv{background:var(--chip);border-radius:10px;padding:6px 10px;font-size:13px}
+.rowlab{font-size:12px;color:var(--muted);font-weight:600;text-align:center;margin:10px 0 -6px}
+.grid3{grid-template-columns:repeat(3,1fr)}
+.ptr{height:auto;min-height:20px;font-size:12px;white-space:nowrap}
+.cell.arrow{background:transparent;aspect-ratio:auto;height:30px;font-size:20px;color:var(--muted)}
+.center-chips{justify-content:center;margin:10px 0}
+.chip.dimc{opacity:.4}.chip.on{background:var(--primary);color:#fff}
+.tl{margin:6px 0}.tlrow{position:relative;height:32px}
+.tlbar{position:absolute;top:16px;height:12px;border-radius:6px;background:var(--chip);border:2px solid var(--line)}
+.tlbar.cur{background:var(--primary-soft);border-color:var(--primary)}.tlbar.done{opacity:.35}
+.tlbar.merged{background:var(--good-soft);border-color:var(--good)}
+.tll{position:absolute;top:0;font-size:11px;color:var(--muted);white-space:nowrap}
+.tree .lv{display:flex;justify-content:space-around;margin:10px 0}
+.tn{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--chip);border:2px solid transparent}
+.tn.win{background:var(--primary-soft);border-color:var(--primary)}
+.tn.in{background:var(--good-soft);border-color:var(--good);border-style:dashed}
+.tn.ghost{visibility:hidden}
+.trie{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:15px;background:var(--code);border:1px solid var(--line);border-radius:12px;padding:8px;margin:10px 0;max-height:240px;overflow:auto}
+.tline{padding:2px 6px;border-radius:5px}.tline.on{background:var(--primary-soft)}
+.bits{display:flex;flex-direction:column;align-items:center;gap:4px;margin:10px 0;font-size:15px}
+.bits code{font-family:"JetBrains Mono",monospace;font-size:20px;letter-spacing:.18em}
+.opt code{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:13px}
+.shake{animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.miss p{margin:0 0 8px;font-weight:600}
+.link{display:block;margin:26px auto 0;color:var(--muted);font-size:13px;text-decoration:underline}
+.prompt{font-size:16px;text-align:center;line-height:1.45;margin:10px 0}
+.win-sum{display:flex;justify-content:center;gap:22px;font-size:15px;margin:6px 0}
+.win-sum b{font-size:20px}
+.diff{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.diff.h{background:var(--bad-soft);color:var(--bad)}
+.step{display:grid;place-items:center;min-width:26px;height:26px;border-radius:8px;background:var(--primary);color:#fff;font-weight:800;font-size:13px}
+.sname{font-size:15px}
+.brow .lcchip{font-size:11px;padding:2px 7px}
+.diff.e{background:var(--good-soft);color:var(--good)}.diff.m{background:#fff1cc;color:#8a5a00}
+:root[data-theme="dark"] .diff.m{background:#3a2e10;color:var(--sun)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .diff.m{background:#3a2e10;color:var(--sun)}}
+.lcchip{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--chip);color:var(--muted);white-space:nowrap}
+.lcline{display:flex;gap:6px;align-items:center;margin-top:8px}
+#meta{display:flex;gap:6px;align-items:center}
+.lclink{display:inline-block;margin-top:8px;color:var(--primary);font-weight:600;font-size:14px;text-decoration:none}
+.bank summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none}
+.bank summary::-webkit-details-marker{display:none}
+.bank summary::after{content:"▾";color:var(--muted);margin-left:8px}
+.bank[open] summary::after{content:"▴"}
+.brow{display:flex;align-items:center;gap:10px;padding:10px 2px;border-top:1px solid var(--line);font-size:14px}
+.brow:first-of-type{margin-top:10px}
+.brow a{flex:1;color:var(--ink);text-decoration:none;font-weight:500}
+.brow input{width:20px;height:20px;accent-color:var(--good);flex:none}
+
+/* ---- graphics upgrade ---- */
+.card{box-shadow:0 1px 2px rgba(20,33,61,.05),0 10px 28px rgba(20,33,61,.07)}
+.hero{background:radial-gradient(130% 110% at 100% 0%,var(--primary-soft),var(--surface) 62%)}
+.lm{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--primary),#8a4dff);color:#fff;font-size:18px;margin-right:9px;box-shadow:0 6px 14px rgba(47,91,255,.35)}
+.mode{box-shadow:0 1px 2px rgba(20,33,61,.05),0 8px 22px rgba(20,33,61,.06);transition:transform .15s,box-shadow .15s}
+@media (hover:hover){.mode:hover,.tier:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(20,33,61,.12)}}
+.micon.c1{background:linear-gradient(135deg,#2f5bff,#7b96ff)}.micon.c2{background:linear-gradient(135deg,#ffb020,#ffd25c)}
+.micon.c3{background:linear-gradient(135deg,#0f9d63,#4fd39a)}.micon.c4{background:linear-gradient(135deg,#8a4dff,#c3a2ff)}
+.micon{box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)}
+.tier{transition:transform .15s,box-shadow .15s}
+.opt{border-bottom-width:4px;box-shadow:0 2px 0 rgba(20,33,61,.03)}
+.opt:active{transform:translateY(2px);border-bottom-width:2px}
+.primary{box-shadow:0 4px 0 #1d3fc4,0 10px 22px rgba(47,91,255,.28);transition:transform .08s,box-shadow .08s}
+.primary:active{transform:translateY(3px);box-shadow:0 1px 0 #1d3fc4}
+.timer>div{background:linear-gradient(90deg,var(--primary),#8a4dff)}
+.big{background:linear-gradient(135deg,var(--primary),#8a4dff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cell{box-shadow:inset 0 -3px 0 rgba(0,0,0,.07)}
+.cell.act{transform:translateY(-3px);box-shadow:0 8px 16px rgba(47,91,255,.28);animation:pop .3s both}
+@keyframes pop{0%{transform:scale(.85)}60%{transform:scale(1.08) translateY(-3px)}100%{transform:translateY(-3px)}}
+.score.bump{animation:bump .3s}
+@keyframes bump{50%{transform:scale(1.35);color:var(--good)}}
+.enter>*{animation:rise .42s cubic-bezier(.2,.8,.2,1) both}
+.enter>*:nth-child(2){animation-delay:.04s}.enter>*:nth-child(3){animation-delay:.08s}.enter>*:nth-child(4){animation-delay:.12s}
+.enter>*:nth-child(5){animation-delay:.16s}.enter>*:nth-child(6){animation-delay:.2s}.enter>*:nth-child(n+7){animation-delay:.24s}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}}
+.gsvg{width:100%;display:block;margin:6px auto 2px;overflow:visible}
+.gsvg text{text-anchor:middle;dominant-baseline:middle;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:14px;fill:var(--ink)}
+.gsvg .gs{font-size:11px;font-weight:600;fill:var(--muted)}
+.gsvg .gt{font-size:11px;font-weight:800;fill:var(--primary)}
+.gn circle{fill:var(--chip);stroke:var(--line);stroke-width:2.5;transition:fill .25s,stroke .25s}
+.gn.win circle{fill:var(--primary-soft);stroke:var(--primary)}
+.gn.in circle{fill:var(--good-soft);stroke:var(--good);stroke-dasharray:5 3}
+.gn.act circle{fill:var(--primary);stroke:var(--primary);filter:drop-shadow(0 4px 8px rgba(47,91,255,.4))}
+.gn.act .gl{fill:#fff}
+.gsvg .gs,.gsvg .gt{paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+.ge{stroke:var(--muted);stroke-width:2;opacity:.6;fill:none}
+.ge.dim{opacity:.15}.ge.on{stroke:var(--primary);stroke-width:3.5;opacity:1}
+.ge.good{stroke:var(--good);stroke-width:3;opacity:1}.ge.bad{stroke:var(--bad);stroke-width:3.5;opacity:1;stroke-dasharray:6 4}
+.ge.loop{stroke:var(--R);opacity:.9;stroke-dasharray:5 4}
+.ahp{fill:var(--muted)}
+.gw rect{fill:var(--surface);stroke:var(--line)}.gw text{font-size:12px}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.confetti i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:fall 1.6s cubic-bezier(.25,.6,.4,1) forwards}
+@keyframes fall{to{transform:translate(var(--dx),105vh) rotate(var(--r));opacity:.9}}
+.trie{border-left:4px solid var(--primary)}
+.tline{position:relative}
+.tlbar{box-shadow:inset 0 -2px 0 rgba(0,0,0,.08)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card,:root:not([data-theme="light"]) .mode{box-shadow:0 10px 28px rgba(0,0,0,.35)}}
+:root[data-theme="dark"] .card,:root[data-theme="dark"] .mode{box-shadow:0 10px 28px rgba(0,0,0,.35)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ---------------- data ---------------- */
+const PATTERNS=["Hashing", "Two Pointers", "Sliding Window", "Prefix Sum", "Binary Search", "Stack", "Monotonic Queue", "Fast & Slow Pointers", "Linked List", "BFS / DFS", "Topological Sort", "Union-Find", "Shortest Path / MST", "Heap / Top-K", "Greedy", "Intervals", "Backtracking", "Dynamic Programming", "Trie", "Bit Manipulation"];
+const TIER1=["Hashing","Two Pointers","Sliding Window","Prefix Sum"];
+const PCOLOR={"Hashing":"#7a4dff","Two Pointers":"#0f9d9d","Sliding Window":"#2f5bff","Prefix Sum":"#b7791f","Binary Search":"#d6336c","Stack":"#5b6bd6","Monotonic Queue":"#2b7bbd","Fast & Slow Pointers":"#c2410c","Linked List":"#9a5b13","BFS / DFS":"#059669","Topological Sort":"#0d8a80","Union-Find":"#7c3aed","Shortest Path / MST":"#0369a1","Heap / Top-K":"#db2777","Greedy":"#a16207","Intervals":"#9333ea","Backtracking":"#dc2626","Dynamic Programming":"#4f46e5","Trie":"#16a34a","Bit Manipulation":"#475569"};
+const SHORT={"Foundations":"Foundations","Core":"Core","Trees and graphs":"Trees & Graphs","Advanced":"Advanced","Recognition":"Recognition"};
+
+const PROBLEMS=[
+[217,"Contains Duplicate","Easy","contains-duplicate","Hashing","Return true if any value appears at least twice in the array.","\"Seen before?\" means a set with O(1) lookups."],
+[242,"Valid Anagram","Easy","valid-anagram","Hashing","Check whether two strings use exactly the same letters with the same counts.","Compare letter counts in a hashmap."],
+[1,"Two Sum","Easy","two-sum","Hashing","In an unsorted array, return the indices of two numbers that add up to a target.","Store each number's index and look up target − x."],
+[387,"First Unique Character in a String","Easy","first-unique-character-in-a-string","Hashing","Return the index of the first character that appears only once in a string.","Count frequencies, then scan for the first count of 1."],
+[49,"Group Anagrams","Medium","group-anagrams","Hashing","Group a list of words so that anagrams end up together.","Group by a signature (sorted letters) in a dictionary."],
+[128,"Longest Consecutive Sequence","Medium","longest-consecutive-sequence","Hashing","Find the length of the longest run of consecutive integers in an unsorted array, in O(n).","Put everything in a set and only start counting at run beginnings."],
+[125,"Valid Palindrome","Easy","valid-palindrome","Two Pointers","Ignoring symbols and case, check whether a string reads the same both ways.","Compare characters walking in from both ends."],
+[26,"Remove Duplicates from Sorted Array","Easy","remove-duplicates-from-sorted-array","Two Pointers","Remove duplicates in place from a sorted array and return the count of unique values.","A slow writer pointer and a fast reader pointer."],
+[977,"Squares of a Sorted Array","Easy","squares-of-a-sorted-array","Two Pointers","Given a sorted array that may contain negatives, return the squares in sorted order.","The largest squares sit at both ends: compare ends."],
+[167,"Two Sum II - Input Array Is Sorted","Medium","two-sum-ii-input-array-is-sorted","Two Pointers","In a sorted array, find two numbers that add up to a target using O(1) extra space.","Sorted plus a pair: squeeze from both ends."],
+[11,"Container With Most Water","Medium","container-with-most-water","Two Pointers","Pick two vertical lines that, with the x-axis, hold the most water.","Start wide and move the shorter side inward."],
+[15,"3Sum","Medium","3sum","Two Pointers","Find all unique triplets in the array that sum to zero.","Sort, fix one number, then two pointers on the rest."],
+[121,"Best Time to Buy and Sell Stock","Easy","best-time-to-buy-and-sell-stock","Sliding Window","Choose one day to buy and a later day to sell for maximum profit.","Track the lowest price so far as the window's left edge."],
+[643,"Maximum Average Subarray I","Easy","maximum-average-subarray-i","Sliding Window","Find the contiguous subarray of length k with the largest average.","Fixed-size block: slide, add one, drop one."],
+[3,"Longest Substring Without Repeating Characters","Medium","longest-substring-without-repeating-characters","Sliding Window","Find the length of the longest substring with no repeated characters.","Longest stretch under a rule: grow right, shrink left."],
+[209,"Minimum Size Subarray Sum","Medium","minimum-size-subarray-sum","Sliding Window","With all positive numbers, find the shortest subarray whose sum is at least a target.","Positives only: expand until valid, then shrink."],
+[424,"Longest Repeating Character Replacement","Medium","longest-repeating-character-replacement","Sliding Window","With at most k letter changes, find the longest substring of one repeated letter.","The window is valid while length − top count ≤ k."],
+[567,"Permutation in String","Medium","permutation-in-string","Sliding Window","Check whether some rearrangement of s1 appears as a substring of s2.","Fixed window of len(s1), compare letter counts."],
+[303,"Range Sum Query - Immutable","Easy","range-sum-query-immutable","Prefix Sum","Answer many queries asking for the sum of elements between index l and r.","Repeated range sums: precompute running totals once."],
+[724,"Find Pivot Index","Easy","find-pivot-index","Prefix Sum","Find the index where the sum on its left equals the sum on its right.","Right sum is total − left − a[i]."],
+[560,"Subarray Sum Equals K","Medium","subarray-sum-equals-k","Prefix Sum","Count the subarrays whose sum equals k (numbers can be negative).","Prefix sums plus a hashmap of how often each appeared."],
+[238,"Product of Array Except Self","Medium","product-of-array-except-self","Prefix Sum","For each position, return the product of all other elements without using division.","Left products times right products."],
+[704,"Binary Search","Easy","binary-search","Binary Search","Find a target's index in a sorted array in O(log n).","Halve the search space each step."],
+[69,"Sqrt(x)","Easy","sqrtx","Binary Search","Return the integer square root of x without a math library.","mid*mid ≤ x is a monotonic check."],
+[875,"Koko Eating Bananas","Medium","koko-eating-bananas","Binary Search","Find the minimum eating speed so all banana piles are finished within h hours.","Smallest value passing a yes/no check: search on the answer."],
+[33,"Search in Rotated Sorted Array","Medium","search-in-rotated-sorted-array","Binary Search","Find a target in a sorted array rotated at an unknown point, in O(log n).","One half is always sorted; decide which side to keep."],
+[153,"Find Minimum in Rotated Sorted Array","Medium","find-minimum-in-rotated-sorted-array","Binary Search","Find the smallest element of a rotated sorted array in O(log n).","Compare mid to the right end to find the drop."],
+[496,"Next Greater Element I","Easy","next-greater-element-i","Stack","For each number, find the first larger number to its right.","Classic next greater: decreasing stack."],
+[739,"Daily Temperatures","Medium","daily-temperatures","Stack","For each day, find how many days until a warmer temperature.","Next greater with distance: stack of indices."],
+[901,"Online Stock Span","Medium","online-stock-span","Stack","For each new price, count the consecutive previous days with price at most today's.","Pop smaller prices and absorb their spans."],
+[141,"Linked List Cycle","Easy","linked-list-cycle","Fast & Slow Pointers","Detect whether a linked list contains a cycle using O(1) memory.","A fast runner eventually laps a slow one."],
+[876,"Middle of the Linked List","Easy","middle-of-the-linked-list","Fast & Slow Pointers","Return the middle node of a linked list in one pass.","Fast moves 2, slow moves 1."],
+[202,"Happy Number","Easy","happy-number","Fast & Slow Pointers","Keep replacing a number by the sum of its digits squared. Does it reach 1 or loop forever?","Hidden cycle detection: Floyd works on sequences too."],
+[142,"Linked List Cycle II","Medium","linked-list-cycle-ii","Fast & Slow Pointers","Return the node where a linked list's cycle begins.","Meet, then reset one pointer to the head."],
+[104,"Maximum Depth of Binary Tree","Easy","maximum-depth-of-binary-tree","BFS / DFS","Find the number of nodes on the longest root-to-leaf path.","Depth is 1 + max(left, right) with DFS."],
+[733,"Flood Fill","Easy","flood-fill","BFS / DFS","Recolor a starting pixel and every connected pixel of the same color.","Spread to same-colored neighbours."],
+[200,"Number of Islands","Medium","number-of-islands","BFS / DFS","Count the islands in a grid of land and water.","Each unvisited land cell starts a new flood fill."],
+[994,"Rotting Oranges","Medium","rotting-oranges","BFS / DFS","Find how many minutes until every orange in the grid is rotten.","Spreading from many sources at once: multi-source BFS."],
+[1091,"Shortest Path in Binary Matrix","Medium","shortest-path-in-binary-matrix","BFS / DFS","Find the shortest clear path from the top-left to the bottom-right of a grid.","Shortest path with equal step costs: BFS."],
+[703,"Kth Largest Element in a Stream","Easy","kth-largest-element-in-a-stream","Heap / Top-K","Keep reporting the kth largest number as new numbers arrive.","Min-heap of size k; its top is the answer."],
+[215,"Kth Largest Element in an Array","Medium","kth-largest-element-in-an-array","Heap / Top-K","Find the kth largest element without fully sorting.","Size-k min-heap, O(n log k)."],
+[347,"Top K Frequent Elements","Medium","top-k-frequent-elements","Heap / Top-K","Return the k most frequent elements.","Count, then keep the top k in a heap."],
+[973,"K Closest Points to Origin","Medium","k-closest-points-to-origin","Heap / Top-K","Return the k points closest to the origin.","Max-heap of size k by distance."],
+[70,"Climbing Stairs","Easy","climbing-stairs","Dynamic Programming","Count the ways to climb n stairs taking 1 or 2 steps at a time.","ways(n) = ways(n−1) + ways(n−2)."],
+[746,"Min Cost Climbing Stairs","Easy","min-cost-climbing-stairs","Dynamic Programming","Each step has a cost. Reach the top paying the minimum total.","Best cost to each step from the two before it."],
+[198,"House Robber","Medium","house-robber","Dynamic Programming","Rob houses for maximum money without robbing two neighbours.","Take or skip each house, keep the best so far."],
+[322,"Coin Change","Medium","coin-change","Dynamic Programming","Find the fewest coins needed to make an amount.","Solve every smaller amount first."],
+[1143,"Longest Common Subsequence","Medium","longest-common-subsequence","Dynamic Programming","Find the length of the longest subsequence shared by two strings.","Two strings, best match: 2D DP table."],
+[78,"Subsets","Medium","subsets","Backtracking","Return every possible subset of a set of distinct numbers.","Include or exclude each element: choose, explore, undo."],
+[46,"Permutations","Medium","permutations","Backtracking","Return every ordering of a list of distinct numbers.","Pick an unused number, recurse, put it back."],
+[39,"Combination Sum","Medium","combination-sum","Backtracking","Find all combinations (numbers reusable) that add up to a target.","Enumerate with pruning once the sum overshoots."],
+[17,"Letter Combinations of a Phone Number","Medium","letter-combinations-of-a-phone-number","Backtracking","Return every letter string a sequence of phone digits could spell.","One branch per letter for each digit."],
+[56,"Merge Intervals","Medium","merge-intervals","Intervals","Merge all overlapping intervals.","Sort by start, then extend or start a new block."],
+[57,"Insert Interval","Medium","insert-interval","Intervals","Insert a new interval into a sorted, non-overlapping list and merge as needed.","Copy before, merge overlaps, copy after."],
+[435,"Non-overlapping Intervals","Medium","non-overlapping-intervals","Intervals","Remove the fewest intervals so the rest do not overlap.","Sort by end and keep the earliest finishers."],
+[452,"Minimum Number of Arrows to Burst Balloons","Medium","minimum-number-of-arrows-to-burst-balloons","Intervals","Find the fewest vertical arrows that burst all balloons given as ranges.","Sort by end and shoot at each group's end."],
+[383, "Ransom Note", "Easy", "ransom-note", "Hashing", "Can the note be built from the letters of a magazine, using each letter at most once?", "Count magazine letters, then spend them."],
+[205, "Isomorphic Strings", "Easy", "isomorphic-strings", "Hashing", "Check whether characters of s can be replaced to get t, with a consistent one-to-one mapping.", "Two maps, one per direction."],
+[290, "Word Pattern", "Easy", "word-pattern", "Hashing", "Check whether a string of words follows a letter pattern like \"abba\".", "Bijection between letters and words: two maps."],
+[169, "Majority Element", "Easy", "majority-element", "Hashing", "Find the element that appears more than n/2 times.", "Count with a hashmap (or a running vote)."],
+[219, "Contains Duplicate II", "Easy", "contains-duplicate-ii", "Hashing", "Is there a repeated value whose two positions are at most k apart?", "Remember the last index of each value."],
+[36, "Valid Sudoku", "Medium", "valid-sudoku", "Hashing", "Check whether a partly filled 9×9 Sudoku board breaks any row, column or box rule.", "One set per row, column and box."],
+[454, "4Sum II", "Medium", "4sum-ii", "Hashing", "Count index tuples across four arrays whose values sum to zero.", "Store all pair sums of two arrays, look up the negatives."],
+[380, "Insert Delete GetRandom O(1)", "Medium", "insert-delete-getrandom-o1", "Hashing", "Design a set supporting insert, remove and get-random, all in average O(1).", "Array for random access plus a map of value to index."],
+[2352, "Equal Row and Column Pairs", "Medium", "equal-row-and-column-pairs", "Hashing", "Count pairs where a grid row is identical to a grid column.", "Hash each row as a tuple, then look up columns."],
+[1657, "Determine if Two Strings Are Close", "Medium", "determine-if-two-strings-are-close", "Hashing", "Can one string become another by swapping letters and swapping all occurrences of two letters?", "Same letter set and same multiset of counts."],
+[283, "Move Zeroes", "Easy", "move-zeroes", "Two Pointers", "Move all zeros to the end while keeping the order of the other numbers, in place.", "A writer pointer for the next non-zero slot."],
+[88, "Merge Sorted Array", "Easy", "merge-sorted-array", "Two Pointers", "Merge a second sorted array into the first, which has spare space at the end.", "Fill from the back with two pointers."],
+[392, "Is Subsequence", "Easy", "is-subsequence", "Two Pointers", "Check whether s appears in t in order, not necessarily contiguous.", "One pointer per string; advance s on a match."],
+[680, "Valid Palindrome II", "Easy", "valid-palindrome-ii", "Two Pointers", "Can a string become a palindrome after deleting at most one character?", "Walk in from both ends; on a mismatch try skipping either side."],
+[345, "Reverse Vowels of a String", "Easy", "reverse-vowels-of-a-string", "Two Pointers", "Reverse only the vowels of a string.", "Pointers from both ends that stop on vowels."],
+[16, "3Sum Closest", "Medium", "3sum-closest", "Two Pointers", "Find three numbers whose sum is closest to a target.", "Sort, fix one, squeeze the other two."],
+[18, "4Sum", "Medium", "4sum", "Two Pointers", "Find all unique quadruplets that add up to a target.", "Sort, fix two, two pointers on the rest."],
+[75, "Sort Colors", "Medium", "sort-colors", "Two Pointers", "Sort an array of 0s, 1s and 2s in one pass without a library sort.", "Three pointers: low, mid, high."],
+[80, "Remove Duplicates from Sorted Array II", "Medium", "remove-duplicates-from-sorted-array-ii", "Two Pointers", "In a sorted array, keep each value at most twice, in place.", "Writer pointer compares with the element two slots back."],
+[881, "Boats to Save People", "Medium", "boats-to-save-people", "Two Pointers", "Each boat holds two people under a weight limit. Find the fewest boats.", "Sort, pair the heaviest with the lightest."],
+[1679, "Max Number of K-Sum Pairs", "Medium", "max-number-of-k-sum-pairs", "Two Pointers", "Remove pairs that sum to k as many times as possible. How many operations?", "Sort and squeeze, or count complements."],
+[151, "Reverse Words in a String", "Medium", "reverse-words-in-a-string", "Two Pointers", "Reverse the order of words in a sentence, cleaning extra spaces.", "Reverse everything, then reverse each word."],
+[485, "Max Consecutive Ones", "Easy", "max-consecutive-ones", "Sliding Window", "Find the longest run of 1s in a binary array.", "Extend the run, reset on a 0."],
+[1004, "Max Consecutive Ones III", "Medium", "max-consecutive-ones-iii", "Sliding Window", "With at most k zeros flipped to 1, find the longest run of 1s.", "Window valid while it holds at most k zeros."],
+[438, "Find All Anagrams in a String", "Medium", "find-all-anagrams-in-a-string", "Sliding Window", "Return every start index where an anagram of p appears in s.", "Fixed window of len(p) with letter counts."],
+[904, "Fruit Into Baskets", "Medium", "fruit-into-baskets", "Sliding Window", "Collect the most fruit from consecutive trees using only two fruit types.", "Longest window with at most 2 distinct values."],
+[1456, "Maximum Number of Vowels in a Substring of Given Length", "Medium", "maximum-number-of-vowels-in-a-substring-of-given-length", "Sliding Window", "Find the most vowels in any substring of length k.", "Fixed window, add the new char, drop the old one."],
+[1493, "Longest Subarray of 1's After Deleting One Element", "Medium", "longest-subarray-of-1s-after-deleting-one-element", "Sliding Window", "Delete exactly one element, then find the longest run of 1s.", "Window with at most one zero."],
+[713, "Subarray Product Less Than K", "Medium", "subarray-product-less-than-k", "Sliding Window", "Count contiguous subarrays of positive numbers whose product is below k.", "Shrink while product ≥ k; each right end adds r − l + 1."],
+[1423, "Maximum Points You Can Obtain from Cards", "Medium", "maximum-points-you-can-obtain-from-cards", "Sliding Window", "Take k cards from either end to maximize points.", "Minimize the middle window of n − k cards."],
+[304, "Range Sum Query 2D - Immutable", "Medium", "range-sum-query-2d-immutable", "Prefix Sum", "Answer many rectangle-sum queries on a fixed matrix.", "2D prefix sums with inclusion–exclusion."],
+[525, "Contiguous Array", "Medium", "contiguous-array", "Prefix Sum", "Find the longest subarray with equal numbers of 0s and 1s.", "Treat 0 as −1; equal prefix sums mark a balanced stretch."],
+[974, "Subarray Sums Divisible by K", "Medium", "subarray-sums-divisible-by-k", "Prefix Sum", "Count subarrays whose sum is divisible by k.", "Count equal prefix-sum remainders."],
+[523, "Continuous Subarray Sum", "Medium", "continuous-subarray-sum", "Prefix Sum", "Is there a subarray of length at least 2 whose sum is a multiple of k?", "Same prefix remainder seen at least 2 indices apart."],
+[1094, "Car Pooling", "Medium", "car-pooling", "Prefix Sum", "Given trips with passenger counts and stops, can one car of fixed capacity serve them all?", "Difference array, then a running sum."],
+[1109, "Corporate Flight Bookings", "Medium", "corporate-flight-bookings", "Prefix Sum", "Apply many range bookings to flights and return each flight's total seats.", "Difference array: +x at start, −x after end."],
+[35, "Search Insert Position", "Easy", "search-insert-position", "Binary Search", "Return a target's index in a sorted array, or where it would be inserted.", "Lower bound with binary search."],
+[278, "First Bad Version", "Easy", "first-bad-version", "Binary Search", "Find the first bad version with as few checks as possible.", "First true in a monotonic yes/no sequence."],
+[34, "Find First and Last Position of Element in Sorted Array", "Medium", "find-first-and-last-position-of-element-in-sorted-array", "Binary Search", "Find the first and last index of a target in a sorted array in O(log n).", "Two binary searches: lower and upper bound."],
+[74, "Search a 2D Matrix", "Medium", "search-a-2d-matrix", "Binary Search", "Search a matrix whose rows are sorted and each row starts after the previous ends.", "Treat it as one sorted array."],
+[162, "Find Peak Element", "Medium", "find-peak-element", "Binary Search", "Find any element larger than its neighbours in O(log n).", "Move toward the rising side."],
+[1011, "Capacity To Ship Packages Within D Days", "Medium", "capacity-to-ship-packages-within-d-days", "Binary Search", "Find the smallest ship capacity that delivers all packages in order within d days.", "Binary search on the answer with a greedy check."],
+[981, "Time Based Key-Value Store", "Medium", "time-based-key-value-store", "Binary Search", "Store values with timestamps and return the latest value at or before a given time.", "Timestamps are sorted: binary search per key."],
+[540, "Single Element in a Sorted Array", "Medium", "single-element-in-a-sorted-array", "Binary Search", "Every value appears twice except one. Find it in O(log n).", "Pair alignment breaks after the single element."],
+[2300, "Successful Pairs of Spells and Potions", "Medium", "successful-pairs-of-spells-and-potions", "Binary Search", "For each spell, count potions whose product with it reaches a threshold.", "Sort potions, binary search the cutoff."],
+[20, "Valid Parentheses", "Easy", "valid-parentheses", "Stack", "Check whether a string of brackets is properly opened and closed.", "Push openers, match closers from the top."],
+[1047, "Remove All Adjacent Duplicates In String", "Easy", "remove-all-adjacent-duplicates-in-string", "Stack", "Repeatedly delete adjacent equal letters until none remain.", "Stack: pop when the top matches."],
+[844, "Backspace String Compare", "Easy", "backspace-string-compare", "Stack", "Compare two strings where # means backspace.", "Build each result with a stack."],
+[155, "Min Stack", "Medium", "min-stack", "Stack", "Design a stack that returns its minimum in O(1).", "Store the min alongside each element."],
+[150, "Evaluate Reverse Polish Notation", "Medium", "evaluate-reverse-polish-notation", "Stack", "Evaluate an expression written in postfix notation.", "Push numbers, pop two on each operator."],
+[735, "Asteroid Collision", "Medium", "asteroid-collision", "Stack", "Moving asteroids collide and the smaller explodes. What remains?", "Stack of survivors; resolve collisions at the top."],
+[394, "Decode String", "Medium", "decode-string", "Stack", "Decode strings like 3[a2[c]] into their expanded form.", "Push the current string and count at each ["],
+[503, "Next Greater Element II", "Medium", "next-greater-element-ii", "Stack", "Find the next greater element for each number in a circular array.", "Monotonic stack over the array twice."],
+[853, "Car Fleet", "Medium", "car-fleet", "Stack", "Cars can't pass each other. How many fleets arrive at the target?", "Sort by position; stack of arrival times."],
+[2390, "Removing Stars From a String", "Medium", "removing-stars-from-a-string", "Stack", "Each * deletes the closest character to its left. Return the result.", "Push letters, pop on *."],
+[402, "Remove K Digits", "Medium", "remove-k-digits", "Stack", "Remove k digits from a number to make it as small as possible.", "Increasing stack: pop bigger digits while k remains."],
+[234, "Palindrome Linked List", "Easy", "palindrome-linked-list", "Fast & Slow Pointers", "Check whether a linked list reads the same forwards and backwards.", "Find the middle, reverse the second half, compare."],
+[287, "Find the Duplicate Number", "Medium", "find-the-duplicate-number", "Fast & Slow Pointers", "Find the repeated number in an array of n+1 values from 1..n without changing it.", "Treat values as next pointers: cycle start is the duplicate."],
+[19, "Remove Nth Node From End of List", "Medium", "remove-nth-node-from-end-of-list", "Fast & Slow Pointers", "Remove the nth node from the end of a linked list in one pass.", "Lead pointer n steps ahead, then move both."],
+[143, "Reorder List", "Medium", "reorder-list", "Fast & Slow Pointers", "Reorder a list as first, last, second, second-last, and so on.", "Middle, reverse second half, merge."],
+[2095, "Delete the Middle Node of a Linked List", "Medium", "delete-the-middle-node-of-a-linked-list", "Fast & Slow Pointers", "Delete the middle node of a linked list.", "Slow stops just before the middle."],
+[2130, "Maximum Twin Sum of a Linked List", "Medium", "maximum-twin-sum-of-a-linked-list", "Fast & Slow Pointers", "Find the largest sum of a node and its mirror node in an even-length list.", "Middle, reverse the second half, pair up."],
+[226, "Invert Binary Tree", "Easy", "invert-binary-tree", "BFS / DFS", "Mirror a binary tree.", "Swap children at every node."],
+[100, "Same Tree", "Easy", "same-tree", "BFS / DFS", "Check whether two binary trees are identical.", "DFS both trees together."],
+[101, "Symmetric Tree", "Easy", "symmetric-tree", "BFS / DFS", "Check whether a binary tree is a mirror of itself.", "Compare left and right subtrees mirrored."],
+[112, "Path Sum", "Easy", "path-sum", "BFS / DFS", "Is there a root-to-leaf path whose values add up to a target?", "DFS carrying the remaining sum."],
+[543, "Diameter of Binary Tree", "Easy", "diameter-of-binary-tree", "BFS / DFS", "Find the longest path between any two nodes of a tree.", "At each node, left depth + right depth."],
+[110, "Balanced Binary Tree", "Easy", "balanced-binary-tree", "BFS / DFS", "Check whether every node's subtree heights differ by at most one.", "Post-order DFS returning heights."],
+[102, "Binary Tree Level Order Traversal", "Medium", "binary-tree-level-order-traversal", "BFS / DFS", "Return a tree's values level by level.", "BFS with a queue, one level per loop."],
+[199, "Binary Tree Right Side View", "Medium", "binary-tree-right-side-view", "BFS / DFS", "Return the nodes you'd see looking at a tree from the right.", "BFS and take the last node of each level."],
+[98, "Validate Binary Search Tree", "Medium", "validate-binary-search-tree", "BFS / DFS", "Check whether a binary tree is a valid BST.", "DFS passing down the allowed range."],
+[230, "Kth Smallest Element in a BST", "Medium", "kth-smallest-element-in-a-bst", "BFS / DFS", "Find the kth smallest value in a BST.", "In-order DFS visits values in sorted order."],
+[236, "Lowest Common Ancestor of a Binary Tree", "Medium", "lowest-common-ancestor-of-a-binary-tree", "BFS / DFS", "Find the lowest node that has both given nodes as descendants.", "DFS: the node where both sides report a find."],
+[695, "Max Area of Island", "Medium", "max-area-of-island", "BFS / DFS", "Find the largest island in a grid.", "Flood fill each island and count cells."],
+[133, "Clone Graph", "Medium", "clone-graph", "BFS / DFS", "Deep-copy a connected undirected graph.", "DFS with a map from original to copy."],
+[547, "Number of Provinces", "Medium", "number-of-provinces", "Union-Find", "Count groups of directly or indirectly connected cities.", "Count connected components."],
+[130, "Surrounded Regions", "Medium", "surrounded-regions", "BFS / DFS", "Capture regions of O fully surrounded by X.", "Flood fill from the border first."],
+[417, "Pacific Atlantic Water Flow", "Medium", "pacific-atlantic-water-flow", "BFS / DFS", "Find cells from which water can flow to both oceans.", "Reverse flood fill from each ocean."],
+[207, "Course Schedule", "Medium", "course-schedule", "Topological Sort", "Given prerequisites, can all courses be finished?", "Detect a cycle: topological BFS."],
+[210, "Course Schedule II", "Medium", "course-schedule-ii", "Topological Sort", "Return a valid order to take all courses, if one exists.", "Topological sort with in-degrees."],
+[841, "Keys and Rooms", "Medium", "keys-and-rooms", "BFS / DFS", "Starting in room 0 and collecting keys, can you visit every room?", "DFS over rooms reachable by keys."],
+[1926, "Nearest Exit from Entrance in Maze", "Medium", "nearest-exit-from-entrance-in-maze", "BFS / DFS", "Find the fewest steps from the entrance to any border exit.", "BFS from the entrance."],
+[1046, "Last Stone Weight", "Easy", "last-stone-weight", "Heap / Top-K", "Repeatedly smash the two heaviest stones. What is left?", "Max-heap: pop two, push the difference."],
+[692, "Top K Frequent Words", "Medium", "top-k-frequent-words", "Heap / Top-K", "Return the k most frequent words, ties broken alphabetically.", "Count, then a heap with a custom order."],
+[451, "Sort Characters By Frequency", "Medium", "sort-characters-by-frequency", "Heap / Top-K", "Sort a string so the most frequent characters come first.", "Count, then pop from a max-heap."],
+[621, "Task Scheduler", "Medium", "task-scheduler", "Greedy", "Same tasks need n idle slots between them. Find the minimum total time.", "Always run the most frequent available task."],
+[767, "Reorganize String", "Medium", "reorganize-string", "Heap / Top-K", "Rearrange a string so no two neighbours are equal.", "Alternate the two most frequent letters via a heap."],
+[1834, "Single-Threaded CPU", "Medium", "single-threaded-cpu", "Heap / Top-K", "Simulate a CPU that always picks the shortest available task.", "Sort by arrival, min-heap by duration."],
+[2542, "Maximum Subsequence Score", "Medium", "maximum-subsequence-score", "Heap / Top-K", "Pick k indices to maximize (sum of nums1) × (min of nums2).", "Sort by nums2 descending, keep top-k sum in a heap."],
+[118, "Pascal's Triangle", "Easy", "pascals-triangle", "Dynamic Programming", "Generate the first n rows of Pascal's triangle.", "Each entry is the sum of two above it."],
+[213, "House Robber II", "Medium", "house-robber-ii", "Dynamic Programming", "House Robber, but the houses are in a circle.", "Run House Robber twice, excluding first or last."],
+[62, "Unique Paths", "Medium", "unique-paths", "Dynamic Programming", "Count paths from top-left to bottom-right moving only right or down.", "Paths to a cell = from above + from the left."],
+[64, "Minimum Path Sum", "Medium", "minimum-path-sum", "Dynamic Programming", "Find the cheapest path through a grid moving right or down.", "Cell cost + min(above, left)."],
+[53, "Maximum Subarray", "Medium", "maximum-subarray", "Dynamic Programming", "Find the contiguous subarray with the largest sum.", "Kadane: extend or restart at each element."],
+[152, "Maximum Product Subarray", "Medium", "maximum-product-subarray", "Dynamic Programming", "Find the contiguous subarray with the largest product.", "Track both max and min products."],
+[300, "Longest Increasing Subsequence", "Medium", "longest-increasing-subsequence", "Dynamic Programming", "Find the length of the longest strictly increasing subsequence.", "Best length ending at each index."],
+[139, "Word Break", "Medium", "word-break", "Dynamic Programming", "Can a string be split into dictionary words?", "dp[i] is true if some word ends at i after a true dp."],
+[518, "Coin Change II", "Medium", "coin-change-ii", "Dynamic Programming", "Count the combinations of coins that make an amount.", "Unbounded knapsack, coins in the outer loop."],
+[416, "Partition Equal Subset Sum", "Medium", "partition-equal-subset-sum", "Dynamic Programming", "Can the array be split into two parts with equal sums?", "0/1 knapsack toward half the total."],
+[91, "Decode Ways", "Medium", "decode-ways", "Dynamic Programming", "Count ways to decode a digit string where A=1 ... Z=26.", "Ways from one and two digits back."],
+[5, "Longest Palindromic Substring", "Medium", "longest-palindromic-substring", "Dynamic Programming", "Find the longest palindromic substring.", "Expand around each center (or a 2D DP table)."],
+[714, "Best Time to Buy and Sell Stock with Transaction Fee", "Medium", "best-time-to-buy-and-sell-stock-with-transaction-fee", "Dynamic Programming", "Trade as often as you like, paying a fee per trade. Maximize profit.", "Two states per day: holding or not."],
+[257, "Binary Tree Paths", "Easy", "binary-tree-paths", "Backtracking", "Return every root-to-leaf path as a string.", "Add a node, recurse, remove it."],
+[77, "Combinations", "Medium", "combinations", "Backtracking", "Return all ways to choose k numbers from 1 to n.", "Choose the next number above the last one."],
+[90, "Subsets II", "Medium", "subsets-ii", "Backtracking", "Return all subsets of an array that may contain duplicates, without repeats.", "Sort, skip equal siblings."],
+[47, "Permutations II", "Medium", "permutations-ii", "Backtracking", "Return all unique orderings of a list that may contain duplicates.", "Sort, skip a duplicate if its twin is unused."],
+[40, "Combination Sum II", "Medium", "combination-sum-ii", "Backtracking", "Find unique combinations summing to a target, each number used once.", "Sort, skip duplicates, prune on overshoot."],
+[216, "Combination Sum III", "Medium", "combination-sum-iii", "Backtracking", "Find all sets of k digits from 1–9 that add up to n.", "Choose increasing digits with pruning."],
+[22, "Generate Parentheses", "Medium", "generate-parentheses", "Backtracking", "Generate every valid string of n pairs of parentheses.", "Add ( while open < n, ) while close < open."],
+[79, "Word Search", "Medium", "word-search", "Backtracking", "Can a word be traced through adjacent grid cells without reusing a cell?", "Mark, explore four directions, unmark."],
+[131, "Palindrome Partitioning", "Medium", "palindrome-partitioning", "Backtracking", "Split a string into palindromes in every possible way.", "Cut a palindromic prefix, recurse on the rest."],
+[1288, "Remove Covered Intervals", "Medium", "remove-covered-intervals", "Intervals", "Remove intervals fully covered by another. How many remain?", "Sort by start, then by longer end first."],
+[986, "Interval List Intersections", "Medium", "interval-list-intersections", "Intervals", "Return the intersections of two sorted lists of intervals.", "Two pointers; advance the one that ends first."],
+[646, "Maximum Length of Pair Chain", "Medium", "maximum-length-of-pair-chain", "Intervals", "Find the longest chain of pairs where each starts after the previous ends.", "Sort by end, greedily take the earliest finisher."],
+[2406, "Divide Intervals Into Minimum Number of Groups", "Medium", "divide-intervals-into-minimum-number-of-groups", "Intervals", "Split intervals into the fewest groups with no overlaps inside a group.", "Max overlap at any point: sort plus a min-heap of ends."],
+[76, "Minimum Window Substring", "Hard", "minimum-window-substring", "Sliding Window", "Find the smallest substring of s that contains every character of t (with counts).", "Smallest valid window: expand right, shrink left while still valid."],
+[42, "Trapping Rain Water", "Hard", "trapping-rain-water", "Two Pointers", "Given bar heights, compute how much rain water is trapped between them.", "Move the side with the lower max inward."],
+[160, "Intersection of Two Linked Lists", "Easy", "intersection-of-two-linked-lists", "Fast & Slow Pointers", "Find the node where two linked lists merge, using O(1) memory.", "Two runners swap lists at the end and meet at the join."],
+[410, "Split Array Largest Sum", "Hard", "split-array-largest-sum", "Binary Search", "Split an array into k parts to minimize the largest part's sum.", "Binary search the max sum with a greedy split check."],
+[774, "Minimize Max Distance to Gas Station", "Hard", "minimize-max-distance-to-gas-station", "Binary Search", "Add k gas stations to minimize the largest gap between neighbours.", "Binary search on a real-valued answer.", 1],
+[1283, "Find the Smallest Divisor Given a Threshold", "Medium", "find-the-smallest-divisor-given-a-threshold", "Binary Search", "Find the smallest divisor so the sum of rounded-up divisions stays within a threshold.", "Smallest value passing a monotonic check."],
+[1482, "Minimum Number of Days to Make m Bouquets", "Medium", "minimum-number-of-days-to-make-m-bouquets", "Binary Search", "Find the earliest day you can make m bouquets of k adjacent bloomed flowers.", "Binary search the day, count bouquets greedily."],
+[930, "Binary Subarrays With Sum", "Medium", "binary-subarrays-with-sum", "Prefix Sum", "Count subarrays of a binary array whose sum equals a goal.", "Count earlier prefix sums equal to current − goal."],
+[370, "Range Addition", "Medium", "range-addition", "Prefix Sum", "Apply many \"add x to range\" updates to a zero array and return the result.", "Difference array: mark start and end+1, then prefix sum.", 1],
+[1893, "Check if All the Integers in a Range Are Covered", "Easy", "check-if-all-the-integers-in-a-range-are-covered", "Prefix Sum", "Check whether every integer in [left, right] lies in at least one given range.", "Difference array of coverage."],
+[1943, "Describe the Painting", "Medium", "describe-the-painting", "Prefix Sum", "Overlapping painted segments mix colors. Describe the final painting as segments with color sums.", "Difference map over sorted boundary points."],
+[2381, "Shifting Letters II", "Medium", "shifting-letters-ii", "Prefix Sum", "Apply many forward or backward shifts over ranges of a string.", "Difference array of net shifts per index."],
+[84, "Largest Rectangle in Histogram", "Hard", "largest-rectangle-in-histogram", "Stack", "Find the largest rectangle area inside a histogram.", "Nearest smaller bar on each side: increasing stack."],
+[85, "Maximal Rectangle", "Hard", "maximal-rectangle", "Stack", "Find the largest rectangle of 1s in a binary matrix.", "Build heights row by row, then histogram with a stack."],
+[239, "Sliding Window Maximum", "Hard", "sliding-window-maximum", "Monotonic Queue", "Return the maximum of every window of size k.", "Deque of indices with decreasing values."],
+[862, "Shortest Subarray with Sum at Least K", "Hard", "shortest-subarray-with-sum-at-least-k", "Monotonic Queue", "Find the shortest subarray with sum at least k when numbers can be negative.", "Monotonic deque over prefix sums."],
+[1425, "Constrained Subsequence Sum", "Hard", "constrained-subsequence-sum", "Monotonic Queue", "Pick a subsequence with gaps of at most k to maximize the sum.", "DP where the best of the last k comes from a deque."],
+[1438, "Longest Continuous Subarray With Absolute Diff Less Than or Equal to Limit", "Medium", "longest-continuous-subarray-with-absolute-diff-less-than-or-equal-to-limit", "Monotonic Queue", "Find the longest subarray where max − min stays within a limit.", "Window with a max-deque and a min-deque."],
+[1499, "Max Value of Equation", "Hard", "max-value-of-equation", "Monotonic Queue", "Maximize yi + yj + |xi − xj| over point pairs with xj − xi ≤ k.", "Deque keeping the best yi − xi in range."],
+[1696, "Jump Game VI", "Medium", "jump-game-vi", "Monotonic Queue", "Jump at most k steps at a time and maximize the total score.", "DP with the window max from a deque."],
+[252, "Meeting Rooms", "Easy", "meeting-rooms", "Intervals", "Can one person attend all the meetings?", "Sort by start, check neighbours for overlap.", 1],
+[253, "Meeting Rooms II", "Medium", "meeting-rooms-ii", "Intervals", "Find the minimum number of meeting rooms needed.", "Sort starts, min-heap of end times.", 1],
+[45, "Jump Game II", "Medium", "jump-game-ii", "Greedy", "Find the fewest jumps to reach the last index.", "BFS-like levels: track the farthest reach per jump."],
+[55, "Jump Game", "Medium", "jump-game", "Greedy", "Can you reach the last index given max jump lengths?", "Track the farthest index reachable so far."],
+[406, "Queue Reconstruction by Height", "Medium", "queue-reconstruction-by-height", "Greedy", "Rebuild a queue from (height, people-in-front-taller-or-equal) pairs.", "Sort tallest first, insert at index k."],
+[763, "Partition Labels", "Medium", "partition-labels", "Greedy", "Split a string into as many parts as possible so each letter appears in one part.", "Extend the cut to each letter's last occurrence."],
+[134, "Gas Station", "Medium", "gas-station", "Greedy", "Find the start station to complete a circular trip, if one exists.", "Reset the start whenever the tank goes negative."],
+[21, "Merge Two Sorted Lists", "Easy", "merge-two-sorted-lists", "Linked List", "Merge two sorted linked lists into one sorted list.", "Dummy head, attach the smaller node each step."],
+[23, "Merge k Sorted Lists", "Hard", "merge-k-sorted-lists", "Linked List", "Merge k sorted linked lists into one.", "Min-heap of the k current heads."],
+[24, "Swap Nodes in Pairs", "Medium", "swap-nodes-in-pairs", "Linked List", "Swap every two adjacent nodes of a linked list.", "Dummy node and careful pointer rewiring."],
+[25, "Reverse Nodes in k-Group", "Hard", "reverse-nodes-in-k-group", "Linked List", "Reverse the list k nodes at a time.", "Reverse each full group, reconnect the ends."],
+[92, "Reverse Linked List II", "Medium", "reverse-linked-list-ii", "Linked List", "Reverse the part of a list between positions left and right.", "Walk to left, reverse a sublist in place."],
+[138, "Copy List with Random Pointer", "Medium", "copy-list-with-random-pointer", "Linked List", "Deep-copy a list where each node also has a random pointer.", "Map old to new nodes (or interleave copies)."],
+[113, "Path Sum II", "Medium", "path-sum-ii", "BFS / DFS", "Return every root-to-leaf path whose values add up to a target.", "DFS with a path list: add, recurse, remove."],
+[124, "Binary Tree Maximum Path Sum", "Hard", "binary-tree-maximum-path-sum", "BFS / DFS", "Find the maximum sum of any path in a binary tree.", "Post-order DFS: best single branch up, best bend recorded."],
+[103, "Binary Tree Zigzag Level Order Traversal", "Medium", "binary-tree-zigzag-level-order-traversal", "BFS / DFS", "Return level order values, alternating left-to-right and right-to-left.", "Level BFS, reverse every other level."],
+[515, "Find Largest Value in Each Tree Row", "Medium", "find-largest-value-in-each-tree-row", "BFS / DFS", "Return the largest value on each level of a tree.", "Level BFS, take each level's max."],
+[637, "Average of Levels in Binary Tree", "Easy", "average-of-levels-in-binary-tree", "BFS / DFS", "Return the average value of each level of a tree.", "Level BFS, sum divided by count."],
+[116, "Populating Next Right Pointers in Each Node", "Medium", "populating-next-right-pointers-in-each-node", "BFS / DFS", "Connect each node of a perfect tree to its right neighbour on the same level.", "Level by level, using already-built next pointers."],
+[99, "Recover Binary Search Tree", "Medium", "recover-binary-search-tree", "BFS / DFS", "Two nodes of a BST were swapped by mistake. Fix it without changing the structure.", "In-order DFS finds the two out-of-order nodes."],
+[235, "Lowest Common Ancestor of a Binary Search Tree", "Medium", "lowest-common-ancestor-of-a-binary-search-tree", "BFS / DFS", "Find the lowest common ancestor of two nodes in a BST.", "Go left or right until the values split."],
+[450, "Delete Node in a BST", "Medium", "delete-node-in-a-bst", "BFS / DFS", "Delete a key from a BST and keep it valid.", "Replace with the in-order successor when it has two children."],
+[700, "Search in a Binary Search Tree", "Easy", "search-in-a-binary-search-tree", "BFS / DFS", "Find the node with a given value in a BST.", "Go left if smaller, right if larger."],
+[51, "N-Queens", "Hard", "n-queens", "Backtracking", "Place n queens on an n×n board so none attack each other. Return all boards.", "Place row by row; track columns and diagonals."],
+[52, "N-Queens II", "Hard", "n-queens-ii", "Backtracking", "Count the valid n-queens placements.", "Same backtracking, count instead of build."],
+[1254, "Number of Closed Islands", "Medium", "number-of-closed-islands", "BFS / DFS", "Count islands fully surrounded by water, not touching the border.", "Flood-fill border land first, then count."],
+[802, "Find Eventual Safe States", "Medium", "find-eventual-safe-states", "Topological Sort", "Find nodes from which every path ends at a terminal node.", "Reverse edges, topological peel from terminals."],
+[1462, "Course Schedule IV", "Medium", "course-schedule-iv", "Topological Sort", "Answer queries asking whether one course is a prerequisite of another.", "Topological order propagating prerequisite sets."],
+[1203, "Sort Items by Groups Respecting Dependencies", "Hard", "sort-items-by-groups-respecting-dependencies", "Topological Sort", "Order items so group members stay together and all dependencies are met.", "Two-level topological sort: groups, then items."],
+[2115, "Find All Possible Recipes from Given Supplies", "Medium", "find-all-possible-recipes-from-given-supplies", "Topological Sort", "Find every recipe you can make, where recipes may need other recipes.", "Kahn's algorithm from the supplies."],
+[684, "Redundant Connection", "Medium", "redundant-connection", "Union-Find", "Find the edge that, when removed, turns a graph back into a tree.", "Union-find: the first edge joining connected nodes."],
+[1319, "Number of Operations to Make Network Connected", "Medium", "number-of-operations-to-make-network-connected", "Union-Find", "Find the fewest cable moves to connect all computers.", "Count components; you need components − 1 spare cables."],
+[1579, "Remove Max Number of Edges to Keep Graph Fully Traversable", "Hard", "remove-max-number-of-edges-to-keep-graph-fully-traversable", "Union-Find", "Remove as many edges as possible while both Alice and Bob can still reach every node.", "Two DSUs, shared edges first."],
+[990, "Satisfiability of Equality Equations", "Medium", "satisfiability-of-equality-equations", "Union-Find", "Can variables satisfy all the given == and != equations?", "Union all ==, then check every !=."],
+[1202, "Smallest String With Swaps", "Medium", "smallest-string-with-swaps", "Union-Find", "Swap characters along allowed index pairs to get the smallest string.", "Group indices by component, sort letters inside each."],
+[743, "Network Delay Time", "Medium", "network-delay-time", "Shortest Path / MST", "How long until a signal from one node reaches every node?", "Dijkstra from the source; answer is the max distance."],
+[787, "Cheapest Flights Within K Stops", "Medium", "cheapest-flights-within-k-stops", "Shortest Path / MST", "Find the cheapest flight route using at most k stops.", "Bellman-Ford limited to k+1 rounds."],
+[1514, "Path with Maximum Probability", "Medium", "path-with-maximum-probability", "Shortest Path / MST", "Find the path whose edge probabilities multiply to the highest value.", "Dijkstra with a max-heap on probability."],
+[1631, "Path With Minimum Effort", "Medium", "path-with-minimum-effort", "Shortest Path / MST", "Cross a height grid minimizing the largest single-step height difference.", "Dijkstra where path cost is the max edge."],
+[1334, "Find the City With the Smallest Number of Neighbors at a Threshold Distance", "Medium", "find-the-city-with-the-smallest-number-of-neighbors-at-a-threshold-distance", "Shortest Path / MST", "Find the city that can reach the fewest other cities within a distance limit.", "All-pairs shortest paths (Floyd–Warshall)."],
+[1976, "Number of Ways to Arrive at Destination", "Medium", "number-of-ways-to-arrive-at-destination", "Shortest Path / MST", "Count the shortest-time paths from node 0 to the last node.", "Dijkstra while counting ways per node."],
+[1584, "Min Cost to Connect All Points", "Medium", "min-cost-to-connect-all-points", "Shortest Path / MST", "Connect all points with minimum total Manhattan distance.", "Minimum spanning tree (Prim or Kruskal)."],
+[1135, "Connecting Cities With Minimum Cost", "Medium", "connecting-cities-with-minimum-cost", "Shortest Path / MST", "Find the minimum cost to connect all cities, or report it's impossible.", "Kruskal with union-find.", 1],
+[1168, "Optimize Water Distribution in a Village", "Hard", "optimize-water-distribution-in-a-village", "Shortest Path / MST", "Supply every house with water by building wells or laying pipes at minimum cost.", "Add a virtual well node, then MST.", 1],
+[1489, "Find Critical and Pseudo-Critical Edges in Minimum Spanning Tree", "Hard", "find-critical-and-pseudo-critical-edges-in-minimum-spanning-tree", "Shortest Path / MST", "Classify edges as critical or pseudo-critical for the MST.", "Rerun Kruskal excluding or forcing each edge."],
+[778, "Swim in Rising Water", "Hard", "swim-in-rising-water", "Shortest Path / MST", "Water rises over time. Find the earliest time you can swim from corner to corner.", "Dijkstra on the max height along the path."],
+[1102, "Path With Maximum Minimum Value", "Medium", "path-with-maximum-minimum-value", "Shortest Path / MST", "Find a grid path that maximizes its smallest cell value.", "Max-heap Dijkstra (or sort + union-find).", 1],
+[208, "Implement Trie (Prefix Tree)", "Medium", "implement-trie-prefix-tree", "Trie", "Build a structure supporting insert, search and starts-with for words.", "Tree of character children with an end marker."],
+[211, "Design Add and Search Words Data Structure", "Medium", "design-add-and-search-words-data-structure", "Trie", "Store words and search with '.' as a wildcard.", "Trie plus DFS branching on '.'."],
+[212, "Word Search II", "Hard", "word-search-ii", "Trie", "Find all dictionary words that can be traced in a letter grid.", "Trie of words guides a grid DFS."],
+[648, "Replace Words", "Medium", "replace-words", "Trie", "Replace each word in a sentence with its shortest root from a dictionary.", "Walk the trie until a root ends."],
+[677, "Map Sum Pairs", "Medium", "map-sum-pairs", "Trie", "Store key-value pairs and return the sum of values for keys with a given prefix.", "Trie nodes storing prefix sums."],
+[1268, "Search Suggestions System", "Medium", "search-suggestions-system", "Trie", "Suggest up to three products as each letter of a search word is typed.", "Trie (or sorted list + binary search) per prefix."],
+[136, "Single Number", "Easy", "single-number", "Bit Manipulation", "Every number appears twice except one. Find it with O(1) extra space.", "XOR everything; pairs cancel."],
+[137, "Single Number II", "Medium", "single-number-ii", "Bit Manipulation", "Every number appears three times except one. Find it.", "Count each bit modulo 3."],
+[191, "Number of 1 Bits", "Easy", "number-of-1-bits", "Bit Manipulation", "Count the 1 bits in an integer.", "n & (n − 1) clears the lowest set bit."],
+[338, "Counting Bits", "Easy", "counting-bits", "Bit Manipulation", "Return the number of 1 bits for every number from 0 to n.", "bits[i] = bits[i >> 1] + (i & 1)."],
+[268, "Missing Number", "Easy", "missing-number", "Bit Manipulation", "An array holds n distinct numbers from 0..n. Find the missing one.", "XOR indices with values (or use the sum formula)."],
+[190, "Reverse Bits", "Easy", "reverse-bits", "Bit Manipulation", "Reverse the bits of a 32-bit unsigned integer.", "Shift out the lowest bit, shift into the result."],
+[279, "Perfect Squares", "Medium", "perfect-squares", "Dynamic Programming", "Find the fewest perfect squares that add up to n.", "dp[i] = 1 + min over squares s of dp[i − s]."],
+[494, "Target Sum", "Medium", "target-sum", "Dynamic Programming", "Assign + or − to each number to reach a target. Count the ways.", "Becomes a subset-sum count."],
+[474, "Ones and Zeroes", "Medium", "ones-and-zeroes", "Dynamic Programming", "Pick the most binary strings using at most m zeros and n ones.", "0/1 knapsack with two capacities."],
+[1049, "Last Stone Weight II", "Medium", "last-stone-weight-ii", "Dynamic Programming", "Smash stones in any order to minimize the final weight.", "Split into two piles closest to half: subset sum."],
+[879, "Profitable Schemes", "Hard", "profitable-schemes", "Dynamic Programming", "Count crime schemes using at most n members with profit at least a minimum.", "Knapsack over members and capped profit."],
+[63, "Unique Paths II", "Medium", "unique-paths-ii", "Dynamic Programming", "Count right/down grid paths when some cells are blocked.", "Unique Paths DP with blocked cells set to 0."],
+[221, "Maximal Square", "Medium", "maximal-square", "Dynamic Programming", "Find the largest square of 1s in a binary matrix.", "1 + min(top, left, top-left)."],
+[931, "Minimum Falling Path Sum", "Medium", "minimum-falling-path-sum", "Dynamic Programming", "Find the cheapest path falling from the top row to the bottom row.", "Each cell adds the min of three cells above."],
+[120, "Triangle", "Medium", "triangle", "Dynamic Programming", "Find the minimum path sum from the top to the bottom of a number triangle.", "Bottom-up: each cell adds the min of its two children."],
+[72, "Edit Distance", "Medium", "edit-distance", "Dynamic Programming", "Find the fewest insert, delete or replace operations to turn one word into another.", "2D DP over prefixes of both words."],
+[115, "Distinct Subsequences", "Hard", "distinct-subsequences", "Dynamic Programming", "Count how many distinct subsequences of s equal t.", "2D DP: use or skip each character of s."],
+[583, "Delete Operation for Two Strings", "Medium", "delete-operation-for-two-strings", "Dynamic Programming", "Find the fewest deletions to make two strings equal.", "Total length − 2 × LCS."],
+[97, "Interleaving String", "Medium", "interleaving-string", "Dynamic Programming", "Can s3 be formed by interleaving s1 and s2?", "2D DP over how much of s1 and s2 is used."],
+[1312, "Minimum Insertion Steps to Make a String Palindrome", "Hard", "minimum-insertion-steps-to-make-a-string-palindrome", "Dynamic Programming", "Find the fewest insertions to make a string a palindrome.", "Length − longest palindromic subsequence."]
+];
+const ROADMAP=[["Sliding Window", "Sliding Window", [3, 76, 209, 424, 567, 904]], ["Two Pointers", "Two Pointers", [11, 15, 16, 18, 42, 167]], ["Fast/Slow Pointers (Linked List)", "Fast & Slow Pointers", [141, 142, 19, 876, 160, 234]], ["Binary Search on Sorted Data", "Binary Search", [33, 34, 35, 153, 162, 704]], ["Binary Search on Answer", "Binary Search", [875, 1011, 410, 774, 1283, 1482]], ["Hashing / Frequency Maps", "Hashing", [1, 49, 128, 217, 242, 347]], ["Prefix Sum / Running Sum", "Prefix Sum", [303, 560, 724, 930, 974, 523]], ["Difference Array / Range Updates", "Prefix Sum", [370, 1094, 1109, 1893, 1943, 2381]], ["Monotonic Stack", "Stack", [739, 496, 503, 84, 85, 901]], ["Monotonic Queue / Deque", "Monotonic Queue", [239, 862, 1425, 1438, 1499, 1696]], ["Heap / Top K", "Heap / Top-K", [215, 347, 692, 703, 973, 1046]], ["Intervals", "Intervals", [56, 57, 252, 253, 435, 452]], ["Greedy Scheduling / Sorting", "Greedy", [45, 55, 406, 621, 763, 134]], ["Linked List Manipulation", "Linked List", [21, 23, 24, 25, 92, 138]], ["Tree DFS", "BFS / DFS", [104, 112, 113, 543, 124, 226]], ["Tree BFS / Level Order", "BFS / DFS", [102, 103, 199, 515, 637, 116]], ["BST Problems", "BFS / DFS", [98, 99, 230, 235, 450, 700]], ["Backtracking Basics", "Backtracking", [46, 47, 77, 78, 90, 39]], ["Backtracking with Constraints", "Backtracking", [40, 17, 79, 131, 51, 52]], ["Graph BFS / DFS", "BFS / DFS", [200, 695, 733, 994, 1091, 1254]], ["Topological Sort / DAG", "Topological Sort", [207, 210, 802, 1462, 1203, 2115]], ["Union Find / DSU", "Union-Find", [547, 684, 1319, 1579, 990, 1202]], ["Shortest Path", "Shortest Path / MST", [743, 787, 1514, 1631, 1334, 1976]], ["MST / Graph Greedy", "Shortest Path / MST", [1584, 1135, 1168, 1489, 778, 1102]], ["Trie", "Trie", [208, 211, 212, 648, 677, 1268]], ["Bit Manipulation", "Bit Manipulation", [136, 137, 191, 338, 268, 190]], ["1D DP Basics", "Dynamic Programming", [70, 198, 213, 322, 279, 300]], ["Knapsack / Subset DP", "Dynamic Programming", [416, 494, 518, 474, 1049, 879]], ["Grid DP", "Dynamic Programming", [62, 63, 64, 221, 931, 120]], ["String / Sequence DP", "Dynamic Programming", [1143, 72, 115, 583, 97, 1312]]];
+const LC={};PROBLEMS.forEach(p=>LC[p[0]]={num:p[0],title:p[1],diff:p[2],slug:p[3],p:p[4],text:p[5],tell:p[6],prem:!!p[7]});
+const prem=n=>LC[n].prem?`<span class="lcchip" title="LeetCode Premium">🔒 Premium</span>`:"";
+const lcUrl=n=>`https://leetcode.com/problems/${LC[n].slug}/`;
+const diffPill=d=>`<span class="diff ${d==="Easy"?"e":d==="Medium"?"m":"h"}">${d}</span>`;
+
+const DUEL=[
+{type:"output",lc:387,p:"Hashing",code:"nums = [3, 1, 3, 2, 1]\nseen = {}\nfor x in nums:\n    seen[x] = seen.get(x, 0) + 1\nprint(seen[3] + seen[1])",q:"What does this print?",opts:["2","3","4","5"],a:"4",why:"3 appears twice and 1 appears twice, so 2 + 2 = 4. This frequency map is the backbone of most hashing problems."},
+{type:"output",lc:167,p:"Two Pointers",code:"a = [1, 2, 4, 7, 11]\nl, r = 0, len(a) - 1\nwhile l < r:\n    s = a[l] + a[r]\n    if s == 9: break\n    if s < 9: l += 1\n    else: r -= 1\nprint(l, r)",q:"What does this print?",opts:["1 3","0 3","2 3","1 4"],a:"1 3",why:"1+11=12 is too big so r moves to 3. 1+7=8 is too small so l moves to 1. 2+7=9, found at (1, 3)."},
+{type:"output",lc:643,p:"Sliding Window",code:"a = [2, 1, 5, 1, 3, 2]\nk = 3\nw = sum(a[:k])\nbest = w\nfor i in range(k, len(a)):\n    w += a[i] - a[i - k]\n    best = max(best, w)\nprint(best)",q:"What does this print?",opts:["8","9","10","11"],a:"9",why:"Window sums are 8, 7, 9, 6. The best is 9 from [5, 1, 3]. Each slide costs O(1): add the new element, drop the old one."},
+{type:"output",lc:303,p:"Prefix Sum",code:"a = [3, 1, 4, 1, 5]\np = [0]\nfor x in a:\n    p.append(p[-1] + x)\nprint(p[4] - p[1])",q:"What does this print?",opts:["5","6","9","10"],a:"6",why:"p = [0, 3, 4, 8, 9, 14]. p[4] − p[1] = 9 − 3 = 6, which is the sum of a[1..3] = 1 + 4 + 1."},
+{type:"output",lc:49,p:"Hashing",code:"words = [\"eat\", \"tea\", \"tan\", \"ate\"]\ngroups = {}\nfor w in words:\n    key = \"\".join(sorted(w))\n    groups.setdefault(key, []).append(w)\nprint(len(groups))",q:"What does this print?",opts:["1","2","3","4"],a:"2",why:"Sorted keys are aet, aet, ant, aet. Two distinct keys means two groups."},
+{type:"complexity",lc:217,p:"Hashing",code:"def has_dup(nums):\n    seen = set()\n    for x in nums:\n        if x in seen:\n            return True\n        seen.add(x)\n    return False",q:"Time complexity?",opts:["O(1)","O(log n)","O(n)","O(n²)"],a:"O(n)",why:"One pass, and each set lookup is O(1) on average. The brute-force double loop would be O(n²)."},
+{type:"complexity",lc:1,p:"Two Pointers",code:"def pair(a, t):\n    for i in range(len(a)):\n        for j in range(i + 1, len(a)):\n            if a[i] + a[j] == t:\n                return i, j",q:"Time complexity?",opts:["O(n)","O(n log n)","O(n²)","O(2ⁿ)"],a:"O(n²)",why:"Every pair is checked. If the array is sorted, two pointers solve this in O(n)."},
+{type:"complexity",lc:303,p:"Prefix Sum",code:"p = [0]\nfor x in a:\n    p.append(p[-1] + x)\nfor l, r in queries:\n    print(p[r + 1] - p[l])",q:"n elements, q queries. Total time?",opts:["O(n + q)","O(n · q)","O(n log q)","O(q²)"],a:"O(n + q)",why:"Build the prefix array once in O(n), then each query is O(1). Without it, each query would cost O(n)."},
+{type:"complexity",lc:3,p:"Sliding Window",code:"def longest_unique(s):\n    seen = set()\n    l = best = 0\n    for r in range(len(s)):\n        while s[r] in seen:\n            seen.remove(s[l])\n            l += 1\n        seen.add(s[r])\n        best = max(best, r - l + 1)\n    return best",q:"Time complexity?",opts:["O(n)","O(n log n)","O(n²)","O(n³)"],a:"O(n)",why:"The nested while looks like O(n²), but each character is added once and removed at most once. Total work is O(n)."},
+{type:"bug",lc:167,p:"Two Pointers",code:"def pair_sum(a, t):\n    l, r = 0, len(a)\n    while l < r:\n        s = a[l] + a[r]\n        if s == t: return l, r\n        if s < t: l += 1\n        else: r -= 1",q:"Which line has the bug?",opts:["Line 2","Line 3","Line 6","Line 7"],a:"Line 2",why:"r must start at len(a) − 1. Starting at len(a) reads past the end and raises IndexError."},
+{type:"bug",lc:643,p:"Sliding Window",code:"def max_sum(a, k):\n    w = sum(a[:k])\n    best = w\n    for i in range(k, len(a)):\n        w += a[i] - a[i - k + 1]\n        best = max(best, w)\n    return best",q:"Which line has the bug?",opts:["Line 2","Line 4","Line 5","Line 6"],a:"Line 5",why:"The element leaving the window is a[i − k], not a[i − k + 1]. Off-by-one errors in window edges are the most common sliding window bug."},
+{type:"bug",lc:303,p:"Prefix Sum",code:"def range_sum(a, l, r):  # sum of a[l..r] inclusive\n    p = [0]\n    for x in a:\n        p.append(p[-1] + x)\n    return p[r] - p[l]",q:"Which line has the bug?",opts:["Line 2","Line 3","Line 4","Line 5"],a:"Line 5",why:"p is shifted by one, so the inclusive sum is p[r + 1] − p[l]. As written it drops a[r]."},
+{type:"bug",lc:1,p:"Hashing",code:"def two_sum(nums, t):\n    idx = {}\n    for i, x in enumerate(nums):\n        idx[x] = i\n        if t - x in idx:\n            return idx[t - x], i",q:"Which line has the bug?",opts:["Line 2","Line 4","Line 5","Line 6"],a:"Line 4",why:"Storing x before checking lets x pair with itself (t = 6, x = 3 returns (0, 0)). Check first, then store."},
+{type:"output",lc:20,p:"Stack",code:"s = \"([]{})\"\nst = []\npairs = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\nok = True\nfor c in s:\n    if c in pairs:\n        if not st or st.pop() != pairs[c]:\n            ok = False\n    else:\n        st.append(c)\nprint(ok and not st)",q:"What does this print?",opts:["True","False","None","Error"],a:"True",why:"Every closer matches the opener on top of the stack, and the stack ends empty."},
+{type:"output",lc:739,p:"Stack",code:"t = [73, 74, 75, 71, 69, 72, 76]\nans = [0] * len(t)\nst = []\nfor i, x in enumerate(t):\n    while st and t[st[-1]] < x:\n        j = st.pop()\n        ans[j] = i - j\n    st.append(i)\nprint(ans[2])",q:"What does this print?",opts:["1","3","4","5"],a:"4",why:"75 at index 2 waits until 76 at index 6, so 6 − 2 = 4. The stack holds days still waiting for a warmer one."},
+{type:"output",lc:35,p:"Binary Search",code:"a = [1, 3, 5, 6]\nt = 4\nlo, hi = 0, len(a)\nwhile lo < hi:\n    mid = (lo + hi) // 2\n    if a[mid] < t: lo = mid + 1\n    else: hi = mid\nprint(lo)",q:"What does this print?",opts:["1","2","3","4"],a:"2",why:"This is lower bound: the first index with a value ≥ 4 is index 2, where 4 would be inserted."},
+{type:"bug",lc:704,p:"Binary Search",code:"def search(a, t):\n    lo, hi = 0, len(a) - 1\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if a[mid] == t: return mid\n        if a[mid] < t: lo = mid + 1\n        else: hi = mid - 1\n    return -1",q:"Which line has the bug?",opts:["Line 2","Line 3","Line 4","Line 6"],a:"Line 3",why:"With an inclusive hi, the loop must be lo <= hi. Otherwise the last candidate is never checked, e.g. search([5], 5) returns −1."},
+{type:"output",lc:55,p:"Greedy",code:"nums = [3, 2, 1, 0, 4]\nfar = 0\nfor i, x in enumerate(nums):\n    if i > far: break\n    far = max(far, i + x)\nprint(far >= len(nums) - 1)",q:"What does this print?",opts:["True","False","3","4"],a:"False",why:"Every path gets stuck at index 3 (value 0), so the farthest reach is 3 and index 4 is never reached."},
+{type:"output",lc:1046,p:"Heap / Top-K",code:"import heapq\nstones = [2, 7, 4, 1, 8, 1]\nh = [-s for s in stones]\nheapq.heapify(h)\nwhile len(h) > 1:\n    a, b = -heapq.heappop(h), -heapq.heappop(h)\n    if a != b:\n        heapq.heappush(h, -(a - b))\nprint(-h[0] if h else 0)",q:"What does this print?",opts:["0","1","2","3"],a:"1",why:"Python's heap is a min-heap, so values are negated to act as a max-heap. Smashes: 8−7, 4−2, 2−1, 1−1, leaving 1."},
+{type:"complexity",lc:200,p:"BFS / DFS",code:"def islands(g):\n    m, n = len(g), len(g[0])\n    def sink(i, j):\n        if 0 <= i < m and 0 <= j < n and g[i][j] == \"1\":\n            g[i][j] = \"0\"\n            for di, dj in ((1,0),(-1,0),(0,1),(0,-1)):\n                sink(i + di, j + dj)\n    count = 0\n    for i in range(m):\n        for j in range(n):\n            if g[i][j] == \"1\":\n                sink(i, j); count += 1\n    return count",q:"Time complexity for an m × n grid?",opts:["O(m·n)","O((m·n)²)","O(m + n)","O(m·n·log(mn))"],a:"O(m·n)",why:"Each land cell is sunk once and never revisited, so total work is proportional to the number of cells."},
+{type:"output",lc:207,p:"Topological Sort",code:"from collections import deque\nn, pre = 3, [(1, 0), (2, 1), (0, 2)]\nindeg = [0] * n\nadj = [[] for _ in range(n)]\nfor c, p in pre:\n    adj[p].append(c); indeg[c] += 1\nq = deque(i for i in range(n) if indeg[i] == 0)\ndone = 0\nwhile q:\n    u = q.popleft(); done += 1\n    for v in adj[u]:\n        indeg[v] -= 1\n        if indeg[v] == 0: q.append(v)\nprint(done == n)",q:"What does this print?",opts:["True","False","0","3"],a:"False",why:"0 → 1 → 2 → 0 is a cycle, so no course ever has in-degree 0. Kahn's algorithm processes nothing."},
+{type:"output",lc:547,p:"Union-Find",code:"parent = list(range(5))\ndef find(x):\n    while parent[x] != x:\n        x = parent[x]\n    return x\nfor a, b in [(0, 1), (1, 2), (3, 4)]:\n    parent[find(a)] = find(b)\nprint(len({find(i) for i in range(5)}))",q:"What does this print?",opts:["1","2","3","5"],a:"2",why:"Unions give {0, 1, 2} and {3, 4}, so there are 2 distinct roots."},
+{type:"complexity",lc:208,p:"Trie",code:"def search(root, word):\n    node = root\n    for ch in word:\n        if ch not in node:\n            return False\n        node = node[ch]\n    return \"$\" in node",q:"N words stored, query length L. Time?",opts:["O(L)","O(N · L)","O(log N)","O(1)"],a:"O(L)",why:"A trie walks one node per character, no matter how many words are stored."},
+{type:"output",lc:70,p:"Dynamic Programming",code:"n = 5\na, b = 1, 1\nfor _ in range(n - 1):\n    a, b = b, a + b\nprint(b)",q:"What does this print?",opts:["5","8","10","13"],a:"8",why:"ways(n) = ways(n−1) + ways(n−2): 1, 2, 3, 5, 8. Two variables replace the whole DP array."},
+{type:"bug",lc:198,p:"Dynamic Programming",code:"def rob(nums):\n    prev, cur = 0, 0\n    for x in nums:\n        prev, cur = cur, prev + x\n    return cur",q:"Which line has the bug?",opts:["Line 2","Line 3","Line 4","Line 5"],a:"Line 4",why:"It always robs the current house. It should be cur = max(cur, prev + x), choosing between skipping and robbing."},
+{type:"output",lc:78,p:"Backtracking",code:"res = []\ndef bt(i, path):\n    if i == 3:\n        res.append(path[:])\n        return\n    bt(i + 1, path)\n    path.append(i)\n    bt(i + 1, path)\n    path.pop()\nbt(0, [])\nprint(len(res), res[1])",q:"What does this print?",opts:["8 [2]","8 [0]","6 [2]","8 [1]"],a:"8 [2]",why:"3 elements give 2³ = 8 subsets. Skip comes before take, so the first two are [] and then [2]."},
+{type:"output",lc:136,p:"Bit Manipulation",code:"r = 0\nfor x in [4, 1, 2, 1, 2]:\n    r ^= x\nprint(r)",q:"What does this print?",opts:["0","4","6","10"],a:"4",why:"x ^ x = 0, so every pair cancels and only the single number 4 remains."},
+{type:"pattern",lc:643,opts:["Sliding Window","Binary Search","Backtracking","Heap / Top-K"],why:"A fixed-length contiguous block. Slide it and update the sum in O(1)."},
+{type:"pattern",lc:209,opts:["Sliding Window","Dynamic Programming","Stack","Intervals"],why:"Positive numbers mean the sum only grows as the window grows, so shrinking from the left is safe."},
+{type:"pattern",lc:977,opts:["Two Pointers","Hashing","Dynamic Programming","Stack"],why:"The largest squares sit at the two ends. Compare ends and fill the result from the back."},
+{type:"pattern",lc:125,opts:["Two Pointers","Sliding Window","BFS / DFS","Prefix Sum"],why:"Walk in from both ends, skipping symbols, and compare."},
+{type:"pattern",lc:387,opts:["Hashing","Sliding Window","Prefix Sum","Intervals"],why:"Count every character in one pass, then scan again for the first count of 1."},
+{type:"pattern",lc:128,opts:["Hashing","Dynamic Programming","Heap / Top-K","Binary Search"],why:"Sorting is O(n log n). A set lets you start counting only at the beginning of each run, giving O(n)."},
+{type:"pattern",lc:724,opts:["Prefix Sum","Two Pointers","Backtracking","BFS / DFS"],why:"Left sum is a running total, and right sum is total − left − a[i]. One pass."},
+{type:"pattern",lc:560,opts:["Prefix Sum","Sliding Window","Two Pointers","Intervals"],why:"Negatives break sliding window. Count earlier prefix sums equal to current − k in a hashmap."}
+];
+DUEL.forEach(d=>{if(d.type==="pattern"){d.p=LC[d.lc].p;d.q=LC[d.lc].text;d.a=d.p;}});
+const TYPE={output:"Predict the output",complexity:"Guess the complexity",bug:"Spot the bug",pattern:"Name the pattern"};
+
+const TIERS=[
+["Foundations",["Hashing","Two Pointers","Sliding Window","Prefix Sum"]],
+["Core",["Binary Search","Stack","Monotonic Queue","Fast & Slow Pointers","Linked List","Heap / Top-K","Greedy","Intervals"]],
+["Trees and graphs",["BFS / DFS","Topological Sort","Union-Find","Shortest Path / MST","Trie"]],
+["Advanced",["Backtracking","Dynamic Programming","Bit Manipulation"]]];
+const tierAvg=i=>Math.round(TIERS[i][1].reduce((a,p)=>a+(S.pr[p]||1000),0)/TIERS[i][1].length);
+
+/* ---------------- state ---------------- */
+const KEY="patternix_v1";
+function defState(){return{rating:1000,pr:Object.fromEntries(PATTERNS.map(p=>[p,1000])),recog:1000,best:0,streak:0,last:null,w:0,l:0,d:0,solved:{}};}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);const s=Object.assign(defState(),o);s.pr=Object.assign(defState().pr,o.pr||{});return s;}}catch(e){}return defState();}
+let S=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function dayStr(d){return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+function yesterday(){const y=new Date();y.setDate(y.getDate()-1);return dayStr(y);}
+function bumpStreak(){const t=dayStr(new Date());if(S.last===t)return;S.streak=(S.last===yesterday())?S.streak+1:1;S.last=t;}
+function liveStreak(){return(S.last===dayStr(new Date())||S.last===yesterday())?S.streak:0;}
+
+/* ---------------- helpers ---------------- */
+const app=document.getElementById("app");
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function escCode(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+let T=[],IV=[];
+function later(f,ms){T.push(setTimeout(f,ms));}
+function every(f,ms){IV.push(setInterval(f,ms));}
+function clearAll(){T.forEach(clearTimeout);IV.forEach(clearInterval);T=[];IV=[];}
+function go(screen){clearAll();window.scrollTo(0,0);screen();app.classList.remove("enter");void app.offsetWidth;app.classList.add("enter");}
+function tag(p){return `<span class="tag" style="background:${PCOLOR[p]||"var(--muted)"}">${esc(p)}</span>`;}
+function hl(line){
+  return escCode(line).replace(/(#.*$)|("[^"]*"|'[^']*')|\b(def|return|for|in|if|else|elif|while|break|continue|not|and|or|True|False|None|lambda|import|from)\b|\b(print|len|range|sum|max|min|set|sorted|enumerate)\b|\b(\d+)\b/g,
+  (m,c,str,kw,bi,num)=>c?`<span class="c">${c}</span>`:str?`<span class="s">${str}</span>`:kw?`<span class="k">${kw}</span>`:bi?`<span class="b">${bi}</span>`:`<span class="n">${num}</span>`);
+}
+function codeBlock(code,num,hi){return `<pre class="code ${num?"num":""}">${code.split("\n").map((l,i)=>`<span class="ln ${i===hi?"hi":""}">${hl(l)||" "}</span>`).join("")}</pre>`;}
+function copy(text,btn){
+  const done=()=>{const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=o,1500);};
+  const fallback=()=>{const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){}ta.remove();};
+  try{navigator.clipboard.writeText(text).then(done,fallback);}catch(e){fallback();}
+}
+
+/* ---------------- home ---------------- */
+function radar(){
+  const axes=[...TIERS.map((t,i)=>[t[0],tierAvg(i)]),["Recognition",S.recog]];
+  const cx=180,cy=135,R=80,n=axes.length;
+  const pt=(i,f)=>{const a=-Math.PI/2+i*2*Math.PI/n;return[cx+Math.cos(a)*R*f,cy+Math.sin(a)*R*f];};
+  let g="";
+  [.25,.5,.75,1].forEach(f=>{g+=`<polygon points="${axes.map((_,i)=>pt(i,f).map(v=>v.toFixed(1)).join(",")).join(" ")}" style="fill:none;stroke:var(--line)"/>`;});
+  g+=axes.map((_,i)=>{const[x,y]=pt(i,1);return `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" style="stroke:var(--line)"/>`;}).join("");
+  const val=r=>clamp((r-700)/800,.08,1);
+  const poly=axes.map((a,i)=>pt(i,val(a[1])).map(v=>v.toFixed(1)).join(",")).join(" ");
+  const labels=axes.map((a,i)=>{const[x,y]=pt(i,1.27);const anc=Math.abs(x-cx)<5?"middle":(x>cx?"start":"end");
+    return `<text x="${x.toFixed(1)}" y="${(y-6).toFixed(1)}" text-anchor="${anc}" class="rl">${SHORT[a[0]]}</text><text x="${x.toFixed(1)}" y="${(y+9).toFixed(1)}" text-anchor="${anc}" class="rv">${a[1]}</text>`;}).join("");
+  return `<svg viewBox="0 0 360 270" class="radar" role="img" aria-label="Tier ratings">${g}<polygon points="${poly}" style="fill:var(--primary);fill-opacity:.2;stroke:var(--primary);stroke-width:2.5;stroke-linejoin:round"/>${labels}</svg>`;
+}
+function Home(){
+  app.innerHTML=`
+  <header class="top"><div class="logo"><span class="lm">P</span>Pattern<i>ix</i></div>
+    <div class="pills"><span class="pill" title="Day streak">🔥 ${liveStreak()}</span><span class="pill" title="Duel rating">⚔️ ${S.rating}</span></div></header>
+  <section class="card hero">
+    <div class="row"><h2>Your DSA DNA</h2><button class="ghost sm" id="shareDna">Copy</button></div>
+    ${radar()}
+    <p class="muted small center" style="margin:0">Each tier rating averages its patterns. Play to grow your shape.</p>
+  </section>
+  <div class="sec">Play</div>
+  <button class="mode" id="mRou"><span class="micon c1">🎯</span><span class="mt"><b>Pattern Roulette</b><small>Name the pattern behind LeetCode problems in 60 seconds.${S.best?` Best: ${S.best}`:""}</small></span><span class="go">›</span></button>
+  <button class="mode" id="mDuel"><span class="micon c2">⚔️</span><span class="mt"><b>Duel Byte</b><small>5 shuffled rounds across all four tiers: output, bugs, complexity, patterns.</small></span><span class="go">›</span></button>
+  <button class="mode" id="mLab"><span class="micon c3">🧪</span><span class="mt"><b>Pattern Lab</b><small>Be the algorithm, step by step, in all 20 patterns.</small></span><span class="go">›</span></button>
+  <button class="mode" id="mBank"><span class="micon c4">📚</span><span class="mt"><b>Problem Bank</b><small>${PROBLEMS.length} LeetCode problems: a 30-step roadmap or pattern by pattern.${S.solved?` Solved: ${Object.keys(S.solved).length}`:""}</small></span><span class="go">›</span></button>
+  <div class="sec">Pattern map</div>
+  ${TIERS.map(([n,ps],i)=>{const nums=PROBLEMS.filter(p=>ps.includes(p[4]));const sv=nums.filter(p=>S.solved&&S.solved[p[0]]).length;
+    return `<button class="tier" data-t="${i}"><div class="row"><b>Tier ${i+1}: ${n}</b><span class="badge">Live</span></div><div class="chips">${ps.map(p=>`<span class="chip">${esc(p)}</span>`).join("")}</div><div class="row small muted" style="margin-top:8px"><span>${nums.length} problems, ${sv} solved</span><span>Rating ${tierAvg(i)} ›</span></div></button>`;}).join("")}
+  <button class="link" id="reset">Reset progress</button>`;
+  $("#mRou").onclick=()=>go(Roulette);
+  $("#mDuel").onclick=()=>go(Duel);
+  $("#mLab").onclick=()=>go(()=>Lab("Hashing"));
+  $("#mBank").onclick=()=>go(Bank);
+  $$("[data-t]").forEach(b=>b.onclick=()=>go(()=>Tier(+b.dataset.t)));
+  $("#shareDna").onclick=e=>copy(`My Patternix DSA DNA 🧬\n${TIERS.map((t,i)=>`${t[0]}: ${tierAvg(i)}`).join("\n")}\nRecognition: ${S.recog}\nDuel rating: ${S.rating}`,e.target);
+  let armed=false;
+  $("#reset").onclick=e=>{if(!armed){armed=true;e.target.textContent="Tap again to erase all progress";return;}S=defState();save();go(Home);};
+}
+
+/* ---------------- roulette ---------------- */
+function Roulette(){
+  app.innerHTML=`<div class="bar"><button class="back" id="bk" aria-label="Back">‹</button><div class="title">Pattern Roulette</div><div></div></div>
+  <section class="card center" style="padding:22px 16px"><div class="micon" style="margin:0 auto 10px">🎯</div>
+    <h2>Name the pattern behind ${PROBLEMS.length} LeetCode problems</h2>
+    <p class="muted small">60 seconds. Problems are shuffled and won't repeat until you've seen the whole set.</p></section>
+  <div class="sec">Choose a level</div>
+  <div class="opts">
+    <button class="mode" data-d="Easy"><span class="mt"><b>Easy</b><small>${PROBLEMS.filter(p=>p[2]==="Easy").length} LeetCode easy problems</small></span>${diffPill("Easy")}</button>
+    <button class="mode" data-d="Medium"><span class="mt"><b>Medium</b><small>${PROBLEMS.filter(p=>p[2]==="Medium").length} LeetCode medium problems</small></span>${diffPill("Medium")}</button>
+    <button class="mode" data-d="Hard"><span class="mt"><b>Hard</b><small>${PROBLEMS.filter(p=>p[2]==="Hard").length} LeetCode hard problems</small></span>${diffPill("Hard")}</button>
+    <button class="mode" data-d="Mixed"><span class="mt"><b>Mixed</b><small>All ${PROBLEMS.length} problems, every level</small></span><span class="go">›</span></button>
+  </div>`;
+  $("#bk").onclick=()=>go(Home);
+  $$("[data-d]").forEach(b=>b.onclick=()=>go(()=>playRoulette(b.dataset.d)));
+}
+function playRoulette(level,tier){
+  const tp=tier===undefined?null:TIERS[tier][1];
+  const pool=PROBLEMS.filter(p=>(level==="Mixed"||p[2]===level)&&(!tp||tp.includes(p[4]))).map(p=>LC[p[0]]);
+  const key=tp?"tier"+tier:level;
+  let score=0,wrong=0,combo=0,maxCombo=0,busy=false,done=false,qi=0,cur=null;
+  S.seen=S.seen||{};const seen=new Set(S.seen[key]||[]);
+  let deck=shuffle(pool.filter(p=>!seen.has(p.num)));if(deck.length<10){seen.clear();deck=shuffle(pool.slice());}
+  const missed=[];
+  app.innerHTML=`<div class="bar"><button class="back" id="bk" aria-label="Back">‹</button><div class="timer"><div id="tf"></div></div><div class="score" id="sc">0</div></div>
+  <div class="combo" id="cb"></div>
+  <section class="card"><div class="row"><span class="label">Which pattern solves this?</span><span id="meta"></span></div><p id="pt" class="ptext"></p></section>
+  <div class="opts grid2" id="op"></div>`;
+  $("#bk").onclick=()=>go(tp?()=>Tier(tier):Roulette);
+  const start=Date.now();
+  every(()=>{const left=Math.max(0,60-(Date.now()-start)/1000);const tf=$("#tf");if(!tf)return;tf.style.width=(left/60*100)+"%";if(left<=10)tf.classList.add("low");if(left<=0)finish();},100);
+  function next(){
+    if(done)return;
+    if(qi>=deck.length){seen.clear();deck=shuffle(pool.slice());qi=0;}
+    cur=deck[qi++];seen.add(cur.num);
+    const near=tp?shuffle(tp.filter(p=>p!==cur.p)):[];const far=shuffle(PATTERNS.filter(p=>p!==cur.p&&!near.includes(p)));
+    const opts=shuffle([cur.p,...near.concat(far).slice(0,3)]);
+    $("#meta").innerHTML=`<span class="lcchip">LC ${cur.num}</span> ${diffPill(cur.diff)}`;
+    $("#pt").textContent=cur.text;
+    $("#op").innerHTML=opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join("");
+    $$("#op .opt").forEach(b=>b.onclick=()=>answer(b));
+    busy=false;
+  }
+  function answer(b){
+    if(busy||done)return;busy=true;
+    if(b.dataset.o===cur.p){
+      score++;combo++;maxCombo=Math.max(maxCombo,combo);b.classList.add("ok");const sc=$("#sc");sc.textContent=score;sc.classList.remove("bump");void sc.offsetWidth;sc.classList.add("bump");
+      $("#cb").innerHTML=combo>=3?`<span>🔥 ${combo} in a row</span>`:"";later(next,280);
+    }else{
+      wrong++;combo=0;b.classList.add("no");$$("#op .opt").forEach(x=>{if(x.dataset.o===cur.p)x.classList.add("ok");});
+      $("#cb").innerHTML="";if(!missed.includes(cur))missed.push(cur);later(next,1100);
+    }
+  }
+  function finish(){
+    if(done)return;done=true;clearAll();
+    S.seen[key]=[...seen];
+    const delta=clamp(score*6-wrong*5,-40,90);
+    S.recog=Math.max(400,S.recog+delta);
+    const newBest=score>S.best;if(newBest)S.best=score;if(newBest&&score>0)setTimeout(confetti,200);
+    bumpStreak();save();
+    const acc=score+wrong?Math.round(score/(score+wrong)*100):0;
+    app.innerHTML=`<section class="card center" style="padding:24px 16px">
+      <div class="label">Time's up, ${tp?TIERS[tier][0]+" tier":level.toLowerCase()+" level"}</div><div class="big">${score}</div>
+      <div class="muted">patterns named in 60 seconds${newBest&&score>0?`<br><b class="good">New personal best</b>`:""}</div>
+      <div class="stats"><div><b>${acc}%</b><span>accuracy</span></div><div><b>${maxCombo}</b><span>best streak</span></div><div><b>${delta>=0?"+":""}${delta}</b><span>recognition</span></div></div>
+    </section>
+    ${missed.length?`<div class="sec">Solve the ones you missed</div>`+missed.slice(0,6).map(m=>`<div class="card miss"><div class="row" style="margin-bottom:8px"><b>${m.num}. ${esc(m.title)}</b><span style="display:flex;gap:6px">${prem(m.num)}${diffPill(m.diff)}</span></div>${tag(m.p)}<p class="muted small" style="margin:8px 0">${esc(m.tell)}</p><a class="lclink" href="${lcUrl(m.num)}" target="_blank" rel="noopener">Solve on LeetCode ↗</a></div>`).join(""):""}
+    <div class="actions"><button class="primary" id="again">Play again</button><div class="two"><button class="ghost" id="share">Copy score</button><button class="ghost" id="home">Home</button></div></div>`;
+    $("#again").onclick=()=>go(()=>playRoulette(level,tier));$("#home").onclick=()=>go(Home);
+    $("#share").onclick=e=>copy(`🎯 Patternix Pattern Roulette (${level})\nI named the pattern for ${score} LeetCode problems in 60s, ${acc}% accuracy. Beat that.`,e.target);
+  }
+  next();
+}
+
+/* ---------------- tier ---------------- */
+function Tier(i){
+  const [name,pats]=TIERS[i];const nums=PROBLEMS.filter(p=>pats.includes(p[4]));
+  app.innerHTML=`<div class="bar"><button class="back" id="bk" aria-label="Back">‹</button><div class="title">Tier ${i+1}</div><div></div></div>
+  <section class="card center" style="padding:22px 16px"><h2>${name}</h2>
+    <p class="muted small">${pats.length} patterns, ${nums.length} problems. Tier rating ${tierAvg(i)}.</p>
+    <button class="primary block" id="tc">Tier challenge, 60s</button>
+    <p class="muted small" style="margin:10px 0 0">Only this tier's problems, and the wrong options are look-alike patterns from the same tier.</p></section>
+  <div class="sec">Patterns</div>
+  <div class="card">${pats.map(p=>{const list=PROBLEMS.filter(q=>q[4]===p);const sv=list.filter(q=>S.solved&&S.solved[q[0]]).length;
+    return `<button class="prow" data-p="${esc(p)}">${tag(p)}<span class="pn"></span><span class="muted small">${sv}/${list.length} solved</span><b>${S.pr[p]||1000}</b><span class="go">›</span></button>`;}).join("")}</div>
+  <button class="mode" id="lab"><span class="micon">🧪</span><span class="mt"><b>Pattern Lab</b><small>Act out each of this tier's ${pats.length} patterns step by step.</small></span><span class="go">›</span></button>`;
+  $("#bk").onclick=()=>go(Home);
+  $("#tc").onclick=()=>go(()=>playRoulette("Mixed",i));
+  $$("[data-p]").forEach(b=>b.onclick=()=>go(()=>Bank("pat",b.dataset.p)));
+  $("#lab").onclick=()=>go(()=>Lab(pats[0]));
+}
+
+/* ---------------- problem bank ---------------- */
+const RANK={Easy:0,Medium:1,Hard:2};
+function Bank(view,focus){
+  view=view||"road";S.solved=S.solved||{};
+  const total=PROBLEMS.length,solved=PROBLEMS.filter(p=>S.solved[p[0]]).length;
+  const row=n=>{const L=LC[n];return `<div class="brow"><input type="checkbox" data-n="${n}" ${S.solved[n]?"checked":""} aria-label="Mark ${esc(L.title)} solved"><a href="${lcUrl(n)}" target="_blank" rel="noopener">${n}. ${esc(L.title)}</a>${prem(n)}${diffPill(L.diff)}</div>`;};
+  const groups=view==="road"
+    ?ROADMAP.map(([name,pat,nums],i)=>({head:`<span class="step">${i+1}</span><b class="sname">${esc(name)}</b>`,nums,open:false}))
+    :PATTERNS.map(pat=>({pat,head:tag(pat),nums:PROBLEMS.filter(p=>p[4]===pat).sort((a,b)=>RANK[a[2]]-RANK[b[2]]).map(p=>p[0]),open:false}));
+  const fi=focus?groups.findIndex(g=>g.pat===focus):groups.findIndex(g=>g.nums.some(n=>!S.solved[n]));if(fi>=0)groups[fi].open=true;
+  app.innerHTML=`<div class="bar"><button class="back" id="bk" aria-label="Back">‹</button><div class="title">Problem Bank</div><div></div></div>
+  <section class="card"><div class="row"><b>${solved} of ${total} solved</b><span class="muted small">LeetCode</span></div>
+    <div class="timer" style="margin-top:10px"><div style="width:${solved/total*100}%"></div></div>
+    <p class="muted small" style="margin:10px 0 0">Tick a problem once you've solved it on LeetCode. 🔒 marks Premium problems.</p></section>
+  <div class="tabs"><button class="${view==="road"?"on":""}" id="vr">Roadmap, 30 steps</button><button class="${view==="pat"?"on":""}" id="vp">By pattern</button></div>
+  ${groups.map((g,gi)=>{const n=g.nums.filter(x=>S.solved[x]).length;return `<details class="card bank" id="g${gi}"${g.open?" open":""}><summary><span class="row" style="flex:1;justify-content:flex-start;gap:10px">${g.head}<span class="muted small" style="margin-left:auto">${n}/${g.nums.length}</span></span></summary>${g.nums.map(row).join("")}</details>`;}).join("")}`;
+  $("#bk").onclick=()=>go(Home);
+  if(focus&&fi>=0)setTimeout(()=>{const el=document.getElementById("g"+fi);if(el)el.scrollIntoView({block:"start"});},50);
+  $("#vr").onclick=()=>go(()=>Bank("road"));$("#vp").onclick=()=>go(()=>Bank("pat"));
+  $$(".brow input").forEach(c=>c.onchange=()=>{
+    const p=LC[c.dataset.n];const pts=p.diff==="Easy"?8:p.diff==="Medium"?15:25;
+    const on=c.checked;
+    if(on)S.solved[p.num]=1;else delete S.solved[p.num];
+    if(S.pr[p.p]!==undefined)S.pr[p.p]=Math.max(600,S.pr[p.p]+(on?pts:-pts));
+    if(on)bumpStreak();save();
+    $$(`.brow input[data-n="${p.num}"]`).forEach(x=>x.checked=on);
+    $$("details.bank").forEach(d=>{const ins=[...d.querySelectorAll("input")];const k=ins.filter(x=>x.checked).length;d.querySelector("summary .muted").textContent=`${k}/${ins.length}`;});
+    const all=PROBLEMS.filter(q=>S.solved[q[0]]).length;$("section.card b").textContent=`${all} of ${total} solved`;$("section.card .timer>div").style.width=(all/total*100)+"%";
+  });
+}
+
+/* ---------------- duel ---------------- */
+function Duel(){
+  const bot={rating:Math.max(700,S.rating+Math.round((Math.random()*2-1)*80))};
+  app.innerHTML=`<div class="bar"><button class="back" id="bk" aria-label="Back">‹</button><div class="title">Duel</div><div></div></div>
+  <section class="card vs"><div class="side"><div class="av you">You</div><b>You</b><span class="muted">${S.rating}</span></div><div class="vsx">vs</div><div class="side"><div class="av bot">🤖</div><b>Byte</b><span class="muted">${bot.rating}</span></div></section>
+  <p class="muted center small">5 rounds, 20 seconds each. Faster correct answers score more.<br>Record: ${S.w} wins, ${S.l} losses${S.d?`, ${S.d} draws`:""}</p>
+  <button class="primary block" id="start">Start duel</button>`;
+  $("#bk").onclick=()=>go(Home);
+  $("#start").onclick=()=>runDuel(bot);
+}
+function runDuel(bot){
+  const code=shuffle(DUEL.filter(d=>d.type!=="pattern")).slice(0,3);
+  const pats=shuffle(PROBLEMS.slice()).slice(0,2).map(p=>{const L=LC[p[0]];return{type:"pattern",lc:L.num,p:L.p,q:L.text,a:L.p,opts:[L.p,...shuffle(PATTERNS.filter(x=>x!==L.p)).slice(0,3)],why:L.tell};});
+  const qs=shuffle([...code,...pats]);
+  const pAcc=clamp(.55+(bot.rating-1000)/800,.35,.92);
+  let i=0,me=0,op=0;const log=[];
+  function round(){
+    clearAll();window.scrollTo(0,0);
+    const q=qs[i];const opts=shuffle(q.opts.slice());
+    const bt=4+Math.random()*13,bc=Math.random()<pAcc,t0=Date.now();
+    let answered=false,botShown=false;
+    app.innerHTML=`<div class="bar"><button class="back" id="bk" aria-label="Back">‹</button>
+      <div class="duelscore"><span>You <b id="ms">${me}</b></span><span class="muted small">Round ${i+1} of 5</span><span><b id="os">${op}</b> Byte</span></div><div></div></div>
+    <div class="timer"><div id="tf"></div></div>
+    <div class="botline" id="bl"><span class="dot"></span> Byte is thinking</div>
+    <section class="card"><div class="row"><span class="label">${TYPE[q.type]}</span>${tag(q.p)}</div>
+      ${q.lc?`<div class="lcline"><span class="lcchip">${q.type==="pattern"?"LC":"Based on LC"} ${q.lc}</span>${diffPill(LC[q.lc].diff)}</div>`:""}
+      ${q.code?codeBlock(q.code,q.type==="bug"):""}<p class="qtext">${esc(q.q)}</p></section>
+    <div class="opts ${q.type==="pattern"?"":"grid2"}" id="op">${opts.map(o=>`<button class="opt ${q.type!=="pattern"?"mono":""}" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div>
+    <div id="fb"></div>`;
+    $("#bk").onclick=()=>go(Home);
+    every(()=>{const el=(Date.now()-t0)/1000;const tf=$("#tf");if(!tf)return;tf.style.width=Math.max(0,(1-el/20)*100)+"%";if(el>=15)tf.classList.add("low");
+      if(!botShown&&el>=bt){botShown=true;$("#bl").innerHTML=`<span class="dot on"></span> Byte answered`;}
+      if(el>=20&&!answered)resolve(null,20);},100);
+    $$("#op .opt").forEach(b=>b.onclick=()=>{if(!answered)resolve(b,(Date.now()-t0)/1000);});
+    function resolve(b,t){
+      answered=true;clearAll();
+      const ok=!!b&&b.dataset.o===q.a;
+      const myPts=ok?100+Math.max(0,Math.round((20-t)*5)):0;
+      const botAns=bt<20,botPts=botAns&&bc?100+Math.max(0,Math.round((20-bt)*5)):0;
+      me+=myPts;op+=botPts;
+      if(q.type==="pattern")S.recog=Math.max(400,S.recog+(ok?8:-6));
+      else if(S.pr[q.p]!==undefined)S.pr[q.p]=Math.max(600,S.pr[q.p]+(ok?15:-12));
+      log.push({p:q.p,type:q.type,ok,myPts,botPts});
+      $$("#op .opt").forEach(x=>{x.disabled=true;if(x.dataset.o===q.a)x.classList.add("ok");else if(x===b)x.classList.add("no");});
+      $("#ms").textContent=me;$("#os").textContent=op;$("#tf").style.width="0%";
+      $("#bl").innerHTML=!botAns?`<span class="dot bad"></span> Byte ran out of time`:bc?`<span class="dot on"></span> Byte got it in ${bt.toFixed(1)}s, +${botPts}`:`<span class="dot bad"></span> Byte answered wrong`;
+      $("#fb").innerHTML=`<div class="card fb ${ok?"good":"badc"}"><b>${ok?`Correct, +${myPts}`:(b?"Not quite":"Time's up")}</b><p>${esc(q.why)}</p>${q.lc?`<a class="lclink" href="${lcUrl(q.lc)}" target="_blank" rel="noopener">${q.lc}. ${esc(LC[q.lc].title)} on LeetCode ↗</a>`:""}</div>
+        <button class="primary block" id="nx">${i<4?"Next round":"See result"}</button>`;
+      $("#nx").onclick=()=>{i++;if(i<5)round();else end();};
+      $("#fb").scrollIntoView({behavior:"smooth",block:"nearest"});
+    }
+  }
+  function end(){
+    clearAll();window.scrollTo(0,0);
+    const res=me>op?1:me<op?0:.5;
+    const exp=1/(1+Math.pow(10,(bot.rating-S.rating)/400));
+    const d=Math.round(32*(res-exp));
+    S.rating=Math.max(400,S.rating+d);
+    if(res===1){S.w++;setTimeout(confetti,200);}else if(res===0)S.l++;else S.d++;
+    bumpStreak();save();
+    app.innerHTML=`<section class="card center" style="padding:24px 16px">
+      <div class="label">${res===1?"You beat Byte":res===0?"Byte wins this one":"Dead even"}</div>
+      <div class="big">${me}<span class="muted" style="font-size:32px"> : ${op}</span></div>
+      <div class="muted">Duel rating ${S.rating} <b class="${d>=0?"good":"bad"}">(${d>=0?"+":""}${d})</b></div>
+    </section>
+    <div class="sec">Round by round</div>
+    <div class="card"><div class="rounds">${log.map((r,k)=>`<div><span>${r.ok?"✅":"❌"} ${TYPE[r.type]}</span>${tag(r.p)}</div>`).join("")}</div></div>
+    <div class="actions"><button class="primary" id="re">Rematch</button><div class="two"><button class="ghost" id="lab">Practice in Lab</button><button class="ghost" id="home">Home</button></div></div>`;
+    $("#re").onclick=()=>go(Duel);$("#home").onclick=()=>go(Home);$("#lab").onclick=()=>go(()=>Lab("tp"));
+  }
+  round();
+}
+
+/* ---------------- lab ---------------- */
+function Lab(key){
+  if(!key||key==="tp")key="Two Pointers";if(key==="sw")key="Sliding Window";
+  const order=TIERS.flatMap(t=>t[1]);
+  app.innerHTML=`<div class="bar"><button class="back" id="bk" aria-label="Back">‹</button><div class="title">Pattern Lab</div><div></div></div>
+  <div class="labnav" id="ln">${order.map(p=>`<button class="${p===key?"on":""}" data-k="${esc(p)}">${esc(p)}</button>`).join("")}</div>
+  <div id="lab"></div>`;
+  $("#bk").onclick=()=>go(Home);
+  $$("#ln button").forEach(b=>b.onclick=()=>go(()=>Lab(b.dataset.k)));
+  const on=$("#ln .on");if(on&&on.scrollIntoView)on.scrollIntoView({inline:"center",block:"nearest"});
+  if(key==="Two Pointers")TwoPtr();else if(key==="Sliding Window")SlideWin();else runLab(LABS[key],key);
+}
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function distinct(n,a,b){const s=new Set();while(s.size<n)s.add(rnd(a,b));return[...s];}
+function cellsH(a,cls,lab){cls=cls||(()=>"");lab=lab||(()=>"");return `<div class="cells">${a.map((v,i)=>`<div class="cellw"><div class="cell ${cls(v,i)}">${v}</div><div class="ptr">${lab(v,i)}</div></div>`).join("")}</div>`;}
+function kv(pairs){return `<div class="kvs">${pairs.map(([k,v])=>`<span class="kv">${k} <b>${v}</b></span>`).join("")}</div>`;}
+const PL=t=>`<span class="L">${t}</span>`,PR=t=>`<span class="R">${t}</span>`;
+const ufFind=(p,v)=>{while(p[v]!==v)v=p[v];return v;};
+const bin4=v=>v.toString(2).padStart(4,"0");
+function runLab(L,pat){
+  let st,msg,hi,mist,steps,Q;
+  function start(){st=L.init();msg="";hi=-1;mist=0;steps=0;Q=null;draw();}
+  function draw(shake){
+    const fin=L.done(st);if(!fin&&!Q)Q=L.q(st);
+    const g=fin?"":Q.opts.length>4?"grid3":Q.opts.length<=2?"grid2":"";
+    $("#lab").innerHTML=`<section class="card" id="lc">
+      <div class="row"><b>${L.title}</b>${tag(pat)}</div><div class="row" style="margin-top:4px">${L.lc&&LC[L.lc]?`<a class="lclink" style="margin:0" href="${lcUrl(L.lc)}" target="_blank" rel="noopener">Practice: LC ${L.lc} ↗</a>`:""}</div>
+      <p class="muted small" style="margin:6px 0 0">${L.blurb}</p>
+      <div class="viz">${L.view(st)}</div>
+      ${codeBlock(L.code,false,hi)}
+      <div class="msg">${msg}</div>
+      ${fin?`<p class="prompt">${L.end(st)}<br><span class="muted small">${steps} steps, ${mist} mistake${mist===1?"":"s"}</span></p><button class="primary block" id="again">New puzzle</button>`
+      :`<p class="prompt">${Q.prompt}</p><div class="opts ${g}" id="lo">${Q.opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join("")}</div>`}
+    </section>`;
+    if(shake)$("#lc").classList.add("shake");
+    if(fin)$("#again").onclick=start;
+    else $$("#lo .opt").forEach(b=>b.onclick=()=>choose(+b.dataset.i));
+  }
+  function choose(i){
+    const ok=Array.isArray(Q.ans)?Q.ans.includes(i):i===Q.ans;
+    if(!ok){mist++;msg=`<span class="bad">✗ ${Q.hint}</span>`;draw(true);return;}
+    steps++;const r=L.step(st,i,Q)||{};Q=null;msg=`<span class="good">✓ ${r.msg||"Correct"}</span>`;hi=r.hi===undefined?-1:r.hi;
+    if(L.done(st)){if(!mist)confetti();bumpStreak();S.pr[pat]=Math.max(600,(S.pr[pat]||1000)+(mist===0?10:3));save();}
+    draw();
+  }
+  start();
+}
+function gSVG(w,h,nodes,edges,extra,R){R=R||20;const by={};nodes.forEach(n=>by[n.id]=n);
+  const E=edges.map(e=>{const a=by[e.a],b=by[e.b],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d,pad=e.dir?5:0;
+    const x1=a.x+ux*R,y1=a.y+uy*R,x2=b.x-ux*(R+pad),y2=b.y-uy*(R+pad),mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+    if(e.bend){const cx=mx-uy*e.bend,cy=my+ux*e.bend,d1=Math.hypot(cx-a.x,cy-a.y),d2=Math.hypot(b.x-cx,b.y-cy);const sx=a.x+(cx-a.x)/d1*R,sy=a.y+(cy-a.y)/d1*R,ex=b.x-(b.x-cx)/d2*(R+pad),ey=b.y-(b.y-cy)/d2*(R+pad);
+      return `<path class="ge ${e.cls||""}" d="M${sx.toFixed(1)},${sy.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${ex.toFixed(1)},${ey.toFixed(1)}"${e.dir?' marker-end="url(#ah)"':""}/>`;}
+    return `<line class="ge ${e.cls||""}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"${e.dir?' marker-end="url(#ah)"':""}/>`+(e.w!==undefined?`<g class="gw"><rect x="${mx-11}" y="${my-10}" width="22" height="20" rx="7"/><text x="${mx}" y="${my+1}">${e.w}</text></g>`:"");}).join("");
+  const N=nodes.map(n=>`<g class="gn ${n.cls||""}"><circle cx="${n.x}" cy="${n.y}" r="${R}"${n.style?` style="${n.style}"`:""}/><text class="gl" x="${n.x}" y="${n.y+1}">${n.label}</text>${n.sub!==undefined?`<text class="gs" x="${n.x}" y="${n.y+R+14}">${n.sub}</text>`:""}${n.top?`<text class="gt" x="${n.x}" y="${n.y-R-9}">${n.top}</text>`:""}</g>`).join("");
+  return `<svg class="gsvg" viewBox="0 0 ${w} ${h}" role="img"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ahp"/></marker></defs>${extra||""}${E}${N}</svg>`;}
+function confetti(){try{if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;}catch(e){}
+  const C=["#2f5bff","#8a4dff","#ffc93c","#0f9d63","#e5484d","#0f9d9d"],box=document.createElement("div");box.className="confetti";
+  for(let i=0;i<46;i++){const p=document.createElement("i");p.style.left=Math.random()*100+"%";p.style.background=C[i%C.length];p.style.animationDelay=Math.random()*.25+"s";p.style.setProperty("--dx",(Math.random()*160-80)+"px");p.style.setProperty("--r",(Math.random()*720-360)+"deg");if(i%3===0)p.style.borderRadius="50%";box.appendChild(p);}
+  document.body.appendChild(box);setTimeout(()=>box.remove(),1900);}
+const LABS={};
+LABS["Hashing"]={title:"Two Sum with a hashmap",lc:1,blurb:"Walk the array once. For each number, ask: have I already seen its partner?",
+code:"seen = {}\nfor i, x in enumerate(nums):\n    if t - x in seen:\n        return seen[t - x], i\n    seen[x] = i",
+init(){const a=distinct(7,1,20);const i=rnd(0,5),j=rnd(i+1,6);return{a,t:a[i]+a[j],i:0,seen:{},found:null};},
+view(s){return `<div class="target center">Target <b>${s.t}</b></div>`+cellsH(s.a,(v,k)=>s.found?(s.found.includes(k)?"win":"dim"):k===s.i?"act":k<s.i?"dim":"",(v,k)=>k===s.i&&!s.found?PL("x"):"")+kv([["seen",Object.keys(s.seen).length?"{"+Object.entries(s.seen).map(([v,k])=>`${v}: ${k}`).join(", ")+"}":"{}"]]);},
+q(s){const x=s.a[s.i],need=s.t-x,has=need in s.seen;return{prompt:`x = ${x}. Partner needed: ${s.t} − ${x} = <b>${need}</b>. Is it in seen?`,opts:["Yes: return the pair","No: store x, move on"],ans:has?0:1,hint:has?`${need} is already in seen (index ${s.seen[need]}).`:`${need} hasn't been seen yet, so remember ${x} for later.`};},
+step(s){const x=s.a[s.i],need=s.t-x;if(need in s.seen){s.found=[s.seen[need],s.i];return{msg:`Found: indices ${s.found[0]} and ${s.i}`,hi:3};}s.seen[x]=s.i;s.i++;return{msg:`Stored ${x} → index ${s.i-1}`,hi:4};},
+done:s=>!!s.found,end:s=>`<b>${s.a[s.found[0]]} + ${s.a[s.found[1]]} = ${s.t}</b><br>One pass with O(1) lookups: O(n) instead of O(n²).`};
+LABS["Prefix Sum"]={title:"Range sums in O(1)",lc:303,blurb:"Build running totals once, then answer each range query with one subtraction.",
+code:"p = [0]\nfor x in a:\n    p.append(p[-1] + x)\n# sum of a[l..r]\nans = p[r + 1] - p[l]",
+init(){const a=Array.from({length:7},()=>rnd(1,9));const p=[0];a.forEach(x=>p.push(p[p.length-1]+x));const qs=[];while(qs.length<4){const l=rnd(0,5),r=rnd(l+1,6);qs.push([l,r]);}return{a,p,qs,qi:0};},
+view(s){const[l,r]=s.qi<4?s.qs[s.qi]:[-9,-9];return `<div class="rowlab">a</div>`+cellsH(s.a,(v,k)=>k>=l&&k<=r?"win":"",(v,k)=>k===l?PL("l"):k===r?PR("r"):"")+`<div class="rowlab">p (index below)</div>`+cellsH(s.p,(v,k)=>k===l||k===r+1?"act":"",(v,k)=>`<span class="muted">${k}</span>`);},
+q(s){const[l,r]=s.qs[s.qi],P=s.p;const c=shuffle([[`p[${r+1}] − p[${l}] = ${P[r+1]-P[l]}`,1],[`p[${r}] − p[${l}] = ${P[r]-P[l]}`,0],[`p[${r+1}] − p[${l+1}] = ${P[r+1]-P[l+1]}`,0]]);return{prompt:`Sum of a[${l}..${r}], inclusive?`,opts:c.map(x=>x[0]),ans:c.findIndex(x=>x[1]),hint:`p[i] is the sum of the first i elements. The range ends at a[${r}], so use p[${r+1}], and starts at a[${l}], so subtract p[${l}].`};},
+step(s){const[l,r]=s.qs[s.qi];s.qi++;return{msg:`a[${l}..${r}] sums to ${s.p[r+1]-s.p[l]}`,hi:4};},
+done:s=>s.qi>=4,end:s=>"<b>4 range sums, each in O(1)</b><br>after a single O(n) pass to build p."};
+LABS["Binary Search"]={title:"Binary search",lc:704,blurb:"The array is sorted. Check the middle and throw away the half that can't hold the target.",
+code:"lo, hi = 0, len(a) - 1\nwhile lo <= hi:\n    mid = (lo + hi) // 2\n    if a[mid] == t: return mid\n    if a[mid] < t: lo = mid + 1\n    else: hi = mid - 1",
+init(){const a=distinct(11,1,60).sort((x,y)=>x-y);let t;if(Math.random()<.75)t=a[rnd(0,10)];else{do{t=rnd(1,60);}while(a.includes(t));}return{a,t,lo:0,hi:10,res:undefined};},
+view(s){const live=s.lo<=s.hi&&s.res===undefined,mid=(s.lo+s.hi)>>1;return `<div class="target center">Target <b>${s.t}</b></div>`+cellsH(s.a,(v,k)=>s.res>=0&&k===s.res?"win":(k<s.lo||k>s.hi)?"dim":(live&&k===mid?"act":""),(v,k)=>live?[k===s.lo?PL("lo"):"",k===mid?"mid":"",k===s.hi?PR("hi"):""].filter(Boolean).join(" "):"");},
+q(s){const opts=["‹ Go left","Found it","Go right ›","Not in array"];if(s.lo>s.hi)return{prompt:"lo has moved past hi.",opts,ans:3,hint:"The search range is empty, so the target isn't there."};const mid=(s.lo+s.hi)>>1,v=s.a[mid];return{prompt:`a[mid] = <b>${v}</b>, target ${s.t}`,opts,ans:v===s.t?1:v<s.t?2:0,hint:v===s.t?"The middle value is the target.":v<s.t?`${v} < ${s.t}, so the target can only be to the right.`:`${v} > ${s.t}, so the target can only be to the left.`};},
+step(s,i){if(s.lo>s.hi){s.res=-1;return{msg:"Not found",hi:1};}const mid=(s.lo+s.hi)>>1;if(i===1){s.res=mid;return{msg:`Found at index ${mid}`,hi:3};}if(i===2){s.lo=mid+1;return{msg:"lo = mid + 1",hi:4};}s.hi=mid-1;return{msg:"hi = mid − 1",hi:5};},
+done:s=>s.res!==undefined,end:s=>s.res>=0?`<b>Found ${s.t} at index ${s.res}</b><br>At most 4 checks for 11 items. Linear search could need 11.`:`<b>${s.t} is not in the array</b><br>Proved in at most 4 checks.`};
+LABS["Stack"]={title:"Next greater element",lc:496,blurb:"The stack holds numbers still waiting for something bigger. A bigger number pops them and becomes their answer.",
+code:"ans = [-1] * len(a)\nst = []\nfor i, x in enumerate(a):\n    while st and a[st[-1]] < x:\n        ans[st.pop()] = x\n    st.append(i)",
+init(){return{a:Array.from({length:7},()=>rnd(1,9)),i:0,st:[],ans:Array(7).fill(-1)};},
+view(s){return cellsH(s.a,(v,k)=>k===s.i?"act":s.st.includes(k)?"in":"",(v,k)=>k===s.i?PL("x"):"")+kv([["stack",s.st.length?"["+s.st.map(k=>s.a[k]).join(", ")+"] ← top":"empty"]])+`<div class="rowlab">ans</div>`+cellsH(s.ans,v=>v>0?"win":"");},
+q(s){const x=s.a[s.i],top=s.st.length?s.a[s.st[s.st.length-1]]:null,pop=top!==null&&top<x;return{prompt:`x = <b>${x}</b>, top of stack = <b>${top===null?"empty":top}</b>`,opts:["Pop: x answers the top","Push x"],ans:pop?0:1,hint:pop?`${top} < ${x}, so ${x} is ${top}'s next greater. Pop it.`:top===null?"The stack is empty, so push x.":`${top} ≥ ${x}, so x can't answer it. Push x and keep waiting.`};},
+step(s,i){if(i===0){const j=s.st.pop();s.ans[j]=s.a[s.i];return{msg:`Answer for ${s.a[j]} is ${s.a[s.i]}`,hi:4};}s.st.push(s.i);s.i++;return{msg:"Pushed",hi:5};},
+done:s=>s.i>=s.a.length,end:s=>`<b>ans = [${s.ans.join(", ")}]</b><br>Each index is pushed and popped at most once: O(n).`};
+LABS["Monotonic Queue"]={title:"Sliding window maximum",lc:239,blurb:"Window size 3. The deque keeps indices with decreasing values, so its front is always the window max.",
+code:"for i, x in enumerate(a):\n    if dq and dq[0] <= i - k: dq.popleft()\n    while dq and a[dq[-1]] <= x: dq.pop()\n    dq.append(i)\n    if i >= k - 1: out.append(a[dq[0]])",
+init(){return{a:Array.from({length:8},()=>rnd(1,9)),k:3,i:0,dq:[],out:[]};},
+view(s){return cellsH(s.a,(v,j)=>j===s.i?"act":(j>s.i-s.k&&j<s.i)?"win":"",(v,j)=>j===s.i?PL("x"):s.dq.includes(j)?PR("dq"):"")+kv([["deque",s.dq.length?"front ["+s.dq.map(j=>s.a[j]).join(", ")+"] back":"empty"],["maxes",s.out.length?s.out.join(", "):"–"]]);},
+q(s){const x=s.a[s.i],dq=s.dq,front=dq.length>0&&dq[0]<=s.i-s.k,back=!front&&dq.length>0&&s.a[dq[dq.length-1]]<=x;const ans=front?0:back?1:2;return{prompt:`x = a[${s.i}] = <b>${x}</b>`,opts:["Drop front (left the window)","Pop back (≤ x)","Push x"],ans,hint:["The front index has slid out of the window. Drop it first.",`The back value ${dq.length?s.a[dq[dq.length-1]]:""} ≤ ${x}, so it can never be a max again. Pop it.`,"Nothing to remove, so push x."][ans]};},
+step(s,i){if(i===0){s.dq.shift();return{msg:"Dropped the stale front",hi:1};}if(i===1){s.dq.pop();return{msg:"Popped a smaller value",hi:2};}s.dq.push(s.i);let m="Pushed";const rec=s.i>=s.k-1;if(rec){s.out.push(s.a[s.dq[0]]);m+=`; window max = ${s.a[s.dq[0]]}`;}s.i++;return{msg:m,hi:rec?4:3};},
+done:s=>s.i>=s.a.length,end:s=>`<b>Window maxima: ${s.out.join(", ")}</b><br>Every index enters and leaves the deque once: O(n).`};
+const fsNext=(s,j)=>j===null?null:(j<s.n-1?j+1:s.e);
+LABS["Fast & Slow Pointers"]={title:"Cycle detection",lc:141,blurb:"Slow moves 1 node, fast moves 2. If the list loops, fast laps slow and they meet.",
+code:"slow = fast = head\nwhile fast and fast.next:\n    slow = slow.next\n    fast = fast.next.next\n    if slow is fast: return True\nreturn False",
+init(){const n=7,cyc=Math.random()<.7;return{n,vals:distinct(n,1,30),e:cyc?rnd(0,4):null,slow:0,fast:0,moved:false,res:undefined};},
+view(s){const xs=s.vals.map((v,j)=>24+j*48),y=46;const nodes=s.vals.map((v,j)=>({id:j,label:v,x:xs[j],y,cls:j===s.slow||j===s.fast?"act":"",top:[j===s.slow?"S":"",j===s.fast?"F":""].filter(Boolean).join(" ")}));const edges=[];for(let j=0;j<s.n-1;j++)edges.push({a:j,b:j+1,dir:1});
+  let extra="";if(s.e!==null){const x1=xs[s.n-1],x2=xs[s.e];extra=`<path class="ge loop" d="M${x1},${y+20} C${x1},${y+70} ${x2},${y+70} ${x2},${y+25}" marker-end="url(#ah)" fill="none"/><text class="gs" x="${(x1+x2)/2}" y="${y+66}">loops back</text>`;}else nodes[s.n-1].sub="→ None";
+  return gSVG(336,s.e!==null?120:96,nodes,edges,extra,17);},
+q(s){const met=s.moved&&s.slow===s.fast,end=!met&&(s.fast===null||fsNext(s,s.fast)===null);const ans=met?1:end?2:0;return{prompt:`slow at <b>${s.vals[s.slow]}</b>, fast at <b>${s.fast===null?"None":s.vals[s.fast]}</b>`,opts:["Move: slow +1, fast +2","They met: cycle!","Fast hit the end: no cycle"],ans,hint:["They haven't met and fast can still move. Keep going.","They're on the same node, so the list loops.","Fast can't take two more steps: the list ends."][ans]};},
+step(s,i){if(i===0){s.slow=fsNext(s,s.slow);s.fast=fsNext(s,fsNext(s,s.fast));s.moved=true;return{msg:"Moved",hi:3};}s.res=i===1;return{msg:i===1?"Cycle found":"No cycle",hi:i===1?4:5};},
+done:s=>s.res!==undefined,end:s=>s.res?"<b>Cycle detected with O(1) memory</b><br>No hash set needed.":"<b>No cycle</b><br>fast reached the end first."};
+LABS["Linked List"]={title:"Reverse a linked list",lc:92,blurb:"Three pointers: prev, cur and nxt. Each node needs the same three moves, in the right order.",
+code:"prev, cur = None, head\nwhile cur:\n    nxt = cur.next\n    cur.next = prev\n    prev, cur = cur, nxt\nreturn prev",
+init(){return{vals:distinct(5,1,30),nextp:[1,2,3,4,null],prev:null,cur:0,nxt:null,ph:0};},
+view(s){const xs=s.vals.map((v,j)=>40+j*64),y=50;const nodes=s.vals.map((v,j)=>({id:j,label:v,x:xs[j],y,cls:j===s.cur?"act":j===s.prev?"win":"",top:[j===s.prev?"prev":"",j===s.cur?"cur":"",s.ph>0&&j===s.nxt?"nxt":""].filter(Boolean).join(" "),sub:s.nextp[j]===null?"→ ∅":undefined}));
+  const edges=s.nextp.map((t,j)=>t===null?null:{a:j,b:t,dir:1,cls:t<j?"good":""}).filter(Boolean);
+  return gSVG(336,96,nodes,edges,"",19)+`<p class="muted small center" style="margin:0">Green arrows are already reversed.</p>`;},
+q(s){const O=["nxt = cur.next","cur.next = prev","prev, cur = cur, nxt"];const idx=shuffle([0,1,2]);return{prompt:`cur is node <b>${s.vals[s.cur]}</b>. Which line runs next?`,opts:idx.map(k=>`<code>${O[k]}</code>`),ans:idx.indexOf(s.ph),hint:["Save cur.next first, or the rest of the list is lost.","Flip cur's arrow to point back at prev.","Both pointers step forward."][s.ph]};},
+step(s){if(s.ph===0){s.nxt=s.nextp[s.cur];s.ph=1;return{msg:"Saved the next node",hi:2};}if(s.ph===1){s.nextp[s.cur]=s.prev;s.ph=2;return{msg:"Arrow flipped",hi:3};}s.prev=s.cur;s.cur=s.nxt;s.nxt=null;s.ph=0;return{msg:"Both pointers advanced",hi:4};},
+done:s=>s.cur===null,end:s=>`<b>Reversed. New head: ${s.vals[s.prev]}</b><br>O(n) time, O(1) extra space.`};
+LABS["Heap / Top-K"]={title:"Kth largest with a min-heap",lc:215,blurb:"Keep only the 3 largest numbers seen so far. The heap's minimum is the 3rd largest.",
+code:"for x in nums:\n    if len(h) < k: heappush(h, x)\n    elif x > h[0]: heapreplace(h, x)\n    # else: skip x\nreturn h[0]",
+init(){return{a:distinct(8,1,25),k:3,i:0,h:[]};},
+view(s){const h=[...s.h].sort((x,y)=>x-y);return cellsH(s.a,(v,j)=>j===s.i?"act":j<s.i?"dim":"",(v,j)=>j===s.i?PL("x"):"")+`<div class="rowlab">min-heap, size ≤ 3</div>`+(h.length?cellsH(h,(v,j)=>j===0?"in":"win",(v,j)=>j===0?PR("min"):""):`<p class="muted small center">empty</p>`);},
+q(s){const x=s.a[s.i],h=s.h,m=h.length?Math.min(...h):null;const ans=h.length<s.k?0:x>m?1:2;return{prompt:`x = <b>${x}</b>. Heap holds ${h.length}/${s.k}${m!==null?`, min = ${m}`:""}.`,opts:["Push x","Replace the min with x","Skip x"],ans,hint:["The heap has room, so push x.",`${x} > ${m}: x beats the smallest of the top 3, so replace it.`,`${x} ≤ ${m}: x can't be in the top 3. Skip it.`][ans]};},
+step(s,i){const x=s.a[s.i];if(i===0)s.h.push(x);else if(i===1){s.h.splice(s.h.indexOf(Math.min(...s.h)),1);s.h.push(x);}s.i++;return{msg:["Pushed","Replaced the min","Skipped"][i],hi:[1,2,3][i]};},
+done:s=>s.i>=s.a.length,end:s=>`<b>3rd largest = ${Math.min(...s.h)}</b><br>The heap never grows past k: O(n log k).`};
+LABS["Greedy"]={title:"Jump Game",lc:55,blurb:"Each value is the longest jump from that spot. Greedily track the farthest index you can reach.",
+code:"far = 0\nfor i, x in enumerate(nums):\n    if i > far: return False\n    far = max(far, i + x)\n    if far >= len(nums) - 1: return True",
+init(){const a=Array.from({length:8},()=>rnd(0,3));a[0]=rnd(1,3);return{a,i:0,far:0,res:undefined};},
+view(s){const live=s.res===undefined;return cellsH(s.a,(v,j)=>j===s.i&&live?"act":j<=s.far?"win":"dim",(v,j)=>[j===s.i&&live?PL("i"):"",j===s.far?PR("far"):""].filter(Boolean).join(" "));},
+q(s){const x=s.a[s.i],n=s.a.length;let ans;if(s.i>s.far)ans=0;else ans=Math.max(s.far,s.i+x)>=n-1?2:1;const nf=Math.max(s.far,s.i+x);return{prompt:`i = ${s.i}, nums[i] = <b>${x}</b>, far = <b>${s.far}</b>`,opts:["Stuck: i is past far","Update far, continue","The end is reachable"],ans,hint:[`i = ${s.i} is beyond far = ${s.far}, so it can't be reached.`,`far becomes ${nf}, still short of the last index ${n-1}.`,`far becomes ${nf} ≥ ${n-1}, so the end is reachable.`][ans]};},
+step(s,i){if(i===0){s.res=false;return{msg:"Stuck",hi:2};}s.far=Math.max(s.far,s.i+s.a[s.i]);if(i===2){s.res=true;return{msg:"End reachable",hi:4};}s.i++;return{msg:`far = ${s.far}`,hi:3};},
+done:s=>s.res!==undefined,end:s=>s.res?"<b>The end is reachable</b><br>One pass, no backtracking: O(n).":`<b>Stuck at index ${s.i}</b><br>Nothing could jump past index ${s.far}.`};
+LABS["Intervals"]={title:"Merge intervals",lc:56,blurb:"Intervals are sorted by start. Each one either overlaps the current block or starts a new one.",
+code:"intervals.sort()\nmerged = [intervals[0]]\nfor s, e in intervals[1:]:\n    if s <= merged[-1][1]: merged[-1][1] = max(merged[-1][1], e)\n    else: merged.append([s, e])",
+init(){const iv=Array.from({length:6},()=>{const a=rnd(0,20);return[a,a+rnd(1,6)];}).sort((x,y)=>x[0]-y[0]||x[1]-y[1]);return{iv,i:1,m:[[...iv[0]]]};},
+view(s){const W=27,bar=(a,b,c)=>`<div class="tlrow"><div class="tlbar ${c}" style="left:${a/W*100}%;width:${(b-a)/W*100}%"></div><span class="tll" style="left:${a/W*100}%">[${a}, ${b}]</span></div>`;return `<div class="tl">${s.iv.map((v,j)=>bar(v[0],v[1],j===s.i?"cur":j<s.i?"done":"")).join("")}</div><div class="rowlab">merged blocks</div><div class="tl">${s.m.map(v=>bar(v[0],v[1],"merged")).join("")}</div>`;},
+q(s){const[a,b]=s.iv[s.i],le=s.m[s.m.length-1][1],ov=a<=le;return{prompt:`Next is [${a}, ${b}]. Current block ends at <b>${le}</b>.`,opts:["Merge into the block","Start a new block"],ans:ov?0:1,hint:ov?`${a} ≤ ${le}: it overlaps or touches, so merge.`:`${a} > ${le}: there's a gap, so start a new block.`};},
+step(s,i){const[a,b]=s.iv[s.i],L=s.m[s.m.length-1];if(i===0)L[1]=Math.max(L[1],b);else s.m.push([a,b]);s.i++;return{msg:i===0?`Block is now [${L[0]}, ${L[1]}]`:"New block started",hi:i===0?3:4};},
+done:s=>s.i>=s.iv.length,end:s=>`<b>${s.iv.length} intervals became ${s.m.length} block${s.m.length>1?"s":""}</b><br>${s.m.map(v=>`[${v[0]}, ${v[1]}]`).join(" ")}. Sort, then one pass: O(n log n).`};
+LABS["BFS / DFS"]={title:"Level-order BFS",lc:102,blurb:"BFS uses a queue: visit the front node, then add its children to the back.",
+code:"q = deque([root])\nwhile q:\n    node = q.popleft()\n    visit(node)\n    for child in (node.left, node.right):\n        if child: q.append(child)",
+init(){return{has:[1,1,1,...[0,0,0,0].map(()=>Math.random()<.7?1:0)],vals:distinct(7,1,40),q:[0],order:[]};},
+view(s){const P=[[170,30],[90,92],[250,92],[45,154],[135,154],[205,154],[295,154]];const nodes=[],edges=[];for(let j=0;j<7;j++){if(!s.has[j])continue;nodes.push({id:j,label:s.vals[j],x:P[j][0],y:P[j][1],cls:s.order.includes(j)?"win":j===s.q[0]?"act":s.q.includes(j)?"in":""});if(j>0)edges.push({a:(j-1)>>1,b:j,cls:s.order.includes(j)?"good":""});}
+  return gSVG(340,184,nodes,edges,"",19)+kv([["queue",s.q.length?"front ["+s.q.map(j=>s.vals[j]).join(", ")+"] back":"empty"],["visited",s.order.length?s.order.map(j=>s.vals[j]).join(" → "):"–"]]);},
+q(s){const c=s.q[0];const pool=[...s.q.slice(1),...[0,1,2,3,4,5,6].filter(j=>s.has[j]&&!s.q.includes(j)&&!s.order.includes(j))];let o=[c,...shuffle(pool).slice(0,2)];if(o.length<2&&s.order.length)o.push(s.order[s.order.length-1]);o=shuffle(o);return{prompt:"Which node is visited next?",opts:o.map(j=>String(s.vals[j])),ans:o.indexOf(c),hint:"BFS always takes the node at the front of the queue: first in, first out."};},
+step(s){const j=s.q.shift();s.order.push(j);[2*j+1,2*j+2].forEach(c=>{if(c<7&&s.has[c])s.q.push(c);});return{msg:`Visited ${s.vals[j]}, queued its children`,hi:2};},
+done:s=>s.q.length===0,end:s=>`<b>Level order: ${s.order.map(j=>s.vals[j]).join(" → ")}</b><br>Swap the queue for a stack and the same loop becomes DFS.`};
+LABS["Topological Sort"]={title:"Kahn's algorithm",lc:207,blurb:"Arrows are prerequisites. A course is available once nothing points into it (in-degree 0).",
+code:"q = [u for u in nodes if indeg[u] == 0]\nwhile q:\n    u = q.pop()\n    order.append(u)\n    for v in adj[u]:\n        indeg[v] -= 1\n        if indeg[v] == 0: q.append(v)",
+init(){const L=shuffle("ABCDEF".split(""));const ed=[],has=(a,b)=>ed.some(e=>e[0]===a&&e[1]===b);for(let i=0;i<6;i++)for(let j=i+1;j<6;j++)if(Math.random()<.3)ed.push([L[i],L[j]]);let t=0;while(ed.length<6&&t++<60){const i=rnd(0,4),j=rnd(i+1,5);if(!has(L[i],L[j]))ed.push([L[i],L[j]]);}const indeg={};"ABCDEF".split("").forEach(n=>indeg[n]=0);ed.forEach(e=>indeg[e[1]]++);return{ed:shuffle(ed),indeg,order:[]};},
+view(s){const N="ABCDEF".split(""),rk={};N.forEach(n=>rk[n]=0);for(let t=0;t<6;t++)s.ed.forEach(([a,b])=>{rk[b]=Math.max(rk[b],rk[a]+1);});const mr=Math.max(...N.map(n=>rk[n])),cols={};N.forEach(n=>(cols[rk[n]]=cols[rk[n]]||[]).push(n));
+  const H=210,nodes=N.map(n=>{const c=cols[rk[n]],k=c.indexOf(n);return{id:n,label:n,x:mr?32+rk[n]*(276/mr):170,y:H/(c.length+1)*(k+1)-6+(c.length===1?(rk[n]%2?-26:26):0),cls:s.order.includes(n)?"win":s.indeg[n]===0?"in":"",sub:s.order.includes(n)?"done":`in ${s.indeg[n]}`};});
+  const edges=s.ed.map(([a,b],k)=>({a,b,dir:1,bend:rk[b]-rk[a]>1?(k%2?1:-1)*(18+10*(rk[b]-rk[a])):0,cls:s.order.includes(a)?"dim":""}));
+  return gSVG(340,H,nodes,edges,"",18)+kv([["order",s.order.length?s.order.join(" → "):"–"]]);},
+q(s){const rem="ABCDEF".split("").filter(n=>!s.order.includes(n));return{prompt:"Which course can be taken now?",opts:rem,ans:rem.map((n,i)=>s.indeg[n]===0?i:-1).filter(i=>i>=0),hint:"That course still has an unfinished prerequisite (in-degree above 0).",rem};},
+step(s,i,Q){const u=Q.rem[i];s.order.push(u);s.ed.filter(e=>e[0]===u).forEach(e=>s.indeg[e[1]]--);const left="ABCDEF".split("").filter(n=>!s.order.includes(n));let m="";if(left.length===1){s.order.push(left[0]);m=`, and ${left[0]} is the only one left`;}return{msg:`Took ${u}; its arrows are removed${m}`,hi:4};},
+done:s=>s.order.length===6,end:s=>`<b>Valid order: ${s.order.join(" → ")}</b><br>If no node ever reached in-degree 0, the graph would have a cycle.`};
+LABS["Union-Find"]={title:"Find the redundant edge",lc:684,blurb:"Add edges one at a time. If both ends already share a root, this edge closes a cycle.",
+code:"for a, b in edges:\n    ra, rb = find(a), find(b)\n    if ra == rb: return [a, b]   # cycle\n    parent[ra] = rb",
+init(){const perm=shuffle([0,1,2,3,4,5]),tree=[];for(let i=1;i<6;i++)tree.push([perm[i],perm[rnd(0,i-1)]]);shuffle(tree);let x,y;do{x=rnd(0,5);y=rnd(0,5);}while(x===y||tree.some(e=>(e[0]===x&&e[1]===y)||(e[0]===y&&e[1]===x)));const par=[0,1,2,3,4,5];let at=tree.length;for(let k=0;k<tree.length;k++){par[ufFind(par,tree[k][0])]=ufFind(par,tree[k][1]);if(ufFind(par,x)===ufFind(par,y)){at=k+1;break;}}const edges=[...tree];edges.splice(rnd(at,tree.length),0,[x,y]);return{edges,i:0,par:[0,1,2,3,4,5],found:null};},
+view(s){const C=["#2f5bff","#0f9d9d","#8a4dff","#d98a00","#e5484d","#0f9d63"],roots=[0,1,2,3,4,5].map(v=>ufFind(s.par,v));
+  const nodes=[0,1,2,3,4,5].map(v=>{const a=-Math.PI/2+v*Math.PI/3;return{id:v,label:v,x:170+Math.cos(a)*92,y:112+Math.sin(a)*82,style:`fill:${C[roots[v]]}2e;stroke:${C[roots[v]]}`,sub:`root ${roots[v]}`};});
+  const edges=s.edges.map((e,k)=>k<s.i?{a:e[0],b:e[1],cls:"good"}:k===s.i?{a:e[0],b:e[1],cls:s.found?"bad":"on"}:null).filter(Boolean);
+  return gSVG(340,228,nodes,edges,"",19)+`<div class="chips center-chips">${s.edges.map((e,k)=>`<span class="chip ${k===s.i&&!s.found?"on":k<s.i?"dimc":""}">${e[0]}–${e[1]}</span>`).join("")}</div>`;},
+q(s){const[a,b]=s.edges[s.i],ra=ufFind(s.par,a),rb=ufFind(s.par,b);return{prompt:`Edge ${a}–${b}: find(${a}) = <b>${ra}</b>, find(${b}) = <b>${rb}</b>`,opts:["Union the two sets","Same root: cycle!"],ans:ra===rb?1:0,hint:ra===rb?"Both ends already have the same root, so this edge makes a loop.":"Different roots, so this edge joins two separate groups."};},
+step(s,i){const[a,b]=s.edges[s.i];if(i===1){s.found=[a,b];return{msg:"Redundant edge found",hi:2};}s.par[ufFind(s.par,a)]=ufFind(s.par,b);s.i++;return{msg:`Joined ${a} and ${b}`,hi:3};},
+done:s=>!!s.found,end:s=>`<b>Edge ${s.found[0]}–${s.found[1]} is redundant</b><br>With path compression, each find is almost O(1).`};
+LABS["Shortest Path / MST"]={title:"Dijkstra's algorithm",lc:743,blurb:"Finalize the unfinished node with the smallest known distance, then relax its edges.",
+code:"while heap:\n    d, u = heappop(heap)\n    if u in done: continue\n    done.add(u)\n    for v, w in adj[u]:\n        if d + w < dist[v]:\n            dist[v] = d + w\n            heappush(heap, (dist[v], v))",
+init(){const N=["A","B","C","D","E"],p=["A",...shuffle(["B","C","D","E"])],ed=[];for(let i=1;i<5;i++)ed.push([p[rnd(0,i-1)],p[i],rnd(1,9)]);let t=0;while(ed.length<7&&t++<60){const a=N[rnd(0,4)],b=N[rnd(0,4)];if(a!==b&&!ed.some(e=>(e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a)))ed.push([a,b,rnd(1,9)]);}return{N,ed,dist:{A:0,B:Infinity,C:Infinity,D:Infinity,E:Infinity},done:[]};},
+view(s){const nodes=s.N.map((n,v)=>{const a=-Math.PI/2+v*2*Math.PI/5;return{id:n,label:n,x:170+Math.cos(a)*112,y:118+Math.sin(a)*92,cls:s.done.includes(n)?"win":s.dist[n]<Infinity?"in":"",sub:s.dist[n]===Infinity?"∞":s.dist[n]};});
+  const edges=s.ed.map(([a,b,w])=>({a,b,w,cls:s.done.includes(a)&&s.done.includes(b)?"good":""}));
+  return gSVG(340,236,nodes,edges,"",19)+`<p class="muted small center" style="margin:0">Number under each node = shortest distance from A found so far.</p>`;},
+q(s){const rem=s.N.filter(n=>!s.done.includes(n)),m=Math.min(...rem.map(n=>s.dist[n]));return{prompt:"Which node is finalized next?",opts:rem.map(n=>`${n} (${s.dist[n]===Infinity?"∞":s.dist[n]})`),ans:rem.map((n,i)=>s.dist[n]===m?i:-1).filter(i=>i>=0),hint:"Pick the unfinished node with the smallest distance. Nothing can make it shorter any more.",rem};},
+step(s,i,Q){const u=Q.rem[i];s.done.push(u);const ch=[];s.ed.forEach(([a,b,w])=>{const v=a===u?b:b===u?a:null;if(v&&!s.done.includes(v)&&s.dist[u]+w<s.dist[v]){s.dist[v]=s.dist[u]+w;ch.push(`${v} = ${s.dist[v]}`);}});const left=s.N.filter(n=>!s.done.includes(n));let m="";if(left.length===1){s.done.push(left[0]);m=`. ${left[0]} is the last one, so it is final too`;}return{msg:`Finalized ${u}${ch.length?"; updated "+ch.join(", "):""}${m}`,hi:5};},
+done:s=>s.done.length===5,end:s=>`<b>Shortest distances: ${s.N.map(n=>`${n} = ${s.dist[n]}`).join(", ")}</b><br>With a heap this runs in O(E log V).`};
+const TRIE_WORDS=["car","card","care","cat","cab","dog","dot","do","tea","ten","tent","to","toy"];
+LABS["Trie"]={title:"Trie lookups",lc:208,blurb:"Follow one edge per letter. Ending on a ✓ means a whole word; ending anywhere else means only a prefix.",
+code:"node = root\nfor ch in word:\n    if ch not in node: return \"absent\"\n    node = node[ch]\nreturn \"word\" if \"$\" in node else \"prefix\"",
+init(){const W=shuffle(TRIE_WORDS.slice()).slice(0,5),root={};W.forEach(w=>{let n=root;for(const c of w)n=n[c]=n[c]||{};n.$=1;});const kind=q=>{let n=root;for(const c of q){if(!n[c])return 2;n=n[c];}return n.$?0:1;};const pre=[],abs=[];W.forEach(w=>{for(let k=1;k<w.length;k++){const p=w.slice(0,k);if(kind(p)===1&&!pre.includes(p))pre.push(p);}});["cow","tap","dig","cast","tin","doe","cars","tee","cub","dock","tend","ton"].forEach(x=>{if(kind(x)===2)abs.push(x);});const ws=shuffle(W.slice());const qs=[ws[0],pre.length?shuffle(pre)[0]:ws[2],shuffle(abs)[0],ws[1]].map(x=>[x,kind(x)]);return{root,qs:shuffle(qs),qi:0,path:""};},
+view(s){const lines=[];const walk=(n,pre,d)=>{Object.keys(n).filter(k=>k!=="$").sort().forEach(c=>{const p=pre+c;lines.push(`<div class="tline ${s.path&&s.path.startsWith(p)?"on":""}" style="padding-left:${8+d*18}px">${c}${n[c].$?' <b class="good">✓</b>':""}</div>`);walk(n[c],p,d+1);});};walk(s.root,"",0);return `<div class="trie">${lines.join("")}</div>`;},
+q(s){const[w,k]=s.qs[s.qi];return{prompt:`Look up "<b>${w}</b>"`,opts:["Whole word ✓","Only a prefix","Not in the trie"],ans:k,hint:["The walk ends on a node marked ✓.","Every letter exists, but the last node has no ✓.","At some letter there's no matching edge."][k]};},
+step(s){const[w,k]=s.qs[s.qi];s.path=w;s.qi++;return{msg:`"${w}": ${["whole word","prefix only","not present"][k]}`,hi:k===2?2:4};},
+done:s=>s.qi>=s.qs.length,end:s=>"<b>Each lookup costs O(length of the word)</b><br>It doesn't matter how many words are stored."};
+LABS["Backtracking"]={title:"Generate all subsets",lc:78,blurb:"Decide each number in turn: take it and explore, then undo it and explore without it.",
+code:"def bt(i, path):\n    if i == len(nums):\n        res.append(path[:]); return\n    path.append(nums[i]); bt(i + 1, path)  # take\n    path.pop();           bt(i + 1, path)  # skip",
+init(){const nums=distinct(3,1,9),ev=[],path=[];const rec=i=>{if(i===3){ev.push({t:2,i,path:[...path]});return;}ev.push({t:0,i,path:[...path]});path.push(nums[i]);rec(i+1);path.pop();ev.push({t:1,i,path:[...path,nums[i]]});rec(i+1);};rec(0);return{nums,ev,k:0,res:[]};},
+view(s){const fin=s.k>=s.ev.length,e=fin?null:s.ev[s.k];return cellsH(s.nums,(v,j)=>e&&j===e.i?"act":"",(v,j)=>e&&j===e.i?PL("i"):"")+kv([["path",`[${e?e.path.join(", "):""}]`]])+`<div class="rowlab">subsets found (${s.res.length}/8)</div><div class="chips center-chips">${s.res.map(r=>`<span class="chip">[${r.join(", ")}]</span>`).join("")||'<span class="muted small">none yet</span>'}</div>`;},
+q(s){const e=s.ev[s.k];return{prompt:e.i===3?"All 3 numbers are decided. Next?":`Deciding nums[${e.i}] = <b>${s.nums[e.i]}</b>. Next?`,opts:["Take it (append)","Undo it (pop)","Record the subset"],ans:e.t,hint:["This number isn't in the path yet. Take it first, then explore.","The take branch is fully explored. Pop it to explore the skip branch.","Every number has been decided, so save this subset."][e.t]};},
+step(s){const e=s.ev[s.k];s.k++;if(e.t===2)s.res.push(e.path);return{msg:["Took it","Undid it, now skipping","Recorded"][e.t],hi:[3,4,2][e.t]};},
+done:s=>s.k>=s.ev.length,end:s=>"<b>8 subsets = 2³</b><br>Choose, explore, undo: the same template powers Permutations, Combination Sum and N-Queens."};
+LABS["Dynamic Programming"]={title:"House Robber",lc:198,blurb:"You can't rob two neighbours. At each house: skip it, or rob it plus the best from two houses back.",
+code:"prev2, prev1 = 0, 0\nfor x in nums:\n    cur = max(prev1, prev2 + x)   # skip vs rob\n    prev2, prev1 = prev1, cur\nreturn prev1",
+init(){return{a:Array.from({length:7},()=>rnd(1,12)),dp:[],i:0};},
+view(s){return `<div class="rowlab">houses</div>`+cellsH(s.a,(v,j)=>j===s.i?"act":"",(v,j)=>j===s.i?PL("i"):"")+`<div class="rowlab">best total so far</div>`+cellsH(s.a.map((v,j)=>j<s.dp.length?s.dp[j]:"·"),(v,j)=>j<s.dp.length?"win":"dim");},
+q(s){const x=s.a[s.i],p1=s.dp[s.i-1]||0,p2=s.dp[s.i-2]||0,rob=p2+x;return{prompt:`House ${s.i+1} has <b>${x}</b>`,opts:[`Skip: keep ${p1}`,`Rob: ${p2} + ${x} = ${rob}`],ans:rob>p1?1:rob<p1?0:[0,1],hint:`Take the bigger option: skipping gives ${p1}, robbing gives ${rob}.`};},
+step(s){const x=s.a[s.i],p1=s.dp[s.i-1]||0,p2=s.dp[s.i-2]||0;s.dp.push(Math.max(p1,p2+x));s.i++;return{msg:`Best so far = ${s.dp[s.dp.length-1]}`,hi:2};},
+done:s=>s.i>=s.a.length,end:s=>`<b>Max loot = ${s.dp[s.dp.length-1]}</b><br>Each answer reuses two earlier ones: O(n) time, O(1) space.`};
+LABS["Bit Manipulation"]={title:"Single Number with XOR",lc:136,blurb:"Every number appears twice except one. XOR cancels pairs because x ^ x = 0.",
+code:"r = 0\nfor x in nums:\n    r ^= x     # equal bits cancel\nreturn r",
+init(){const v=distinct(3,1,15);return{a:shuffle([v[0],v[0],v[1],v[1],v[2]]),r:0,i:0};},
+view(s){return cellsH(s.a,(v,j)=>j===s.i?"act":j<s.i?"dim":"",(v,j)=>j===s.i?PL("x"):"")+`<div class="bits">${[["r",s.r],...(s.i<s.a.length?[["x",s.a[s.i]]]:[])].map(([k,v])=>`<div><span class="muted">${k}</span> <code>${bin4(v)}</code> <span class="muted">(${v})</span></div>`).join("")}</div>`;},
+q(s){const r=s.r,x=s.a[s.i],vals=[];[r^x,r|x,r&x,(r+x)&15,(~r)&15,r^x^1,r^x^2].forEach(c=>{if(!vals.includes(c)&&vals.length<3)vals.push(c);});const o=shuffle(vals);return{prompt:"r ^ x = ?",opts:o.map(v=>`<code>${bin4(v)}</code> (${v})`),ans:o.indexOf(r^x),hint:"XOR keeps a bit only where r and x differ."};},
+step(s){s.r^=s.a[s.i];s.i++;return{msg:`r = ${bin4(s.r)} (${s.r})`,hi:2};},
+done:s=>s.i>=s.a.length,end:s=>`<b>The single number is ${s.r}</b><br>Pairs cancelled out. O(n) time, O(1) space.`};
+const TPCODE="while l < r:\n    s = a[l] + a[r]\n    if s == t: return l, r\n    if s < t: l += 1\n    else: r -= 1";
+function TwoPtr(){
+  let a,t,l,r,moves,mist;
+  function gen(){
+    const set=new Set();while(set.size<7)set.add(1+Math.floor(Math.random()*24));
+    a=[...set].sort((x,y)=>x-y);
+    const i=Math.floor(Math.random()*6),j=i+1+Math.floor(Math.random()*(6-i));
+    t=a[i]+a[j];l=0;r=a.length-1;moves=0;mist=0;draw("Your move. Compare the sum to the target.",-1);
+  }
+  function cells(){return a.map((v,k)=>`<div class="cellw"><div class="cell ${k===l||k===r?"act":""} ${k<l||k>r?"dim":""}">${v}</div><div class="ptr">${k===l?'<span class="L">L</span>':""}${k===r?'<span class="R">R</span>':""}</div></div>`).join("");}
+  function draw(msg,hi){
+    const s=a[l]+a[r];
+    $("#lab").innerHTML=`<section class="card" id="tpc">
+      <p class="muted small" style="margin:0">Sorted array. Find two numbers that add to the target. You are the algorithm.</p>
+      <div class="target">Target <b>${t}</b></div>
+      <div class="cells">${cells()}</div>
+      <div class="sumline">${a[l]} + ${a[r]} = <b>${s}</b></div>
+      ${codeBlock(TPCODE,false,hi)}
+      <div class="msg">${msg}</div>
+      <div class="ctrl"><button class="opt" id="mL">Move L ›</button><button class="opt" id="fd">Found ✓</button><button class="opt" id="mR">‹ Move R</button></div>
+      <p class="muted small center" style="margin:10px 0 0">Moves ${moves}, mistakes ${mist}</p></section>`;
+    $("#mL").onclick=()=>act("L");$("#fd").onclick=()=>act("F");$("#mR").onclick=()=>act("R");
+  }
+  function act(x){
+    const s=a[l]+a[r],need=s===t?"F":s<t?"L":"R";
+    if(x!==need){
+      mist++;
+      const hint=need==="F"?`${s} equals ${t}. You already found it.`:s<t?`${s} is less than ${t}. Moving L right picks a bigger number.`:`${s} is more than ${t}. Moving R left picks a smaller number.`;
+      draw(`<span class="bad">✗ ${hint}</span>`,-1);$("#tpc").classList.add("shake");return;
+    }
+    moves++;
+    if(need==="F"){
+      if(!mist)confetti();bumpStreak();S.pr["Two Pointers"]=Math.max(600,S.pr["Two Pointers"]+(mist===0?10:3));save();
+      $("#lab").innerHTML=`<section class="card center" style="padding:22px 16px">
+        <div class="cells">${a.map((v,k)=>`<div class="cellw"><div class="cell ${k===l||k===r?"win":"dim"}">${v}</div><div class="ptr"></div></div>`).join("")}</div>
+        <h2 style="margin-top:6px">${a[l]} + ${a[r]} = ${t}</h2>
+        <p class="muted">Found in ${moves} moves with ${mist} mistake${mist===1?"":"s"}.<br>Brute force could check up to 21 pairs. Two pointers needs at most 6 moves.</p>
+        <button class="primary block" id="np">New puzzle</button></section>
+        ${codeBlock(TPCODE,false,2)}`;
+      $("#np").onclick=gen;return;
+    }
+    if(need==="L")l++;else r--;
+    draw(`<span class="good">✓ ${need==="L"?`${s} &lt; ${t}, so l += 1`:`${s} &gt; ${t}, so r -= 1`}</span>`,need==="L"?3:4);
+  }
+  gen();
+}
+const SWCODE="w = sum(a[:k]); best = w\nfor i in range(k, len(a)):\n    w += a[i] - a[i - k]\n    best = max(best, w)";
+function SlideWin(){
+  const k=3;let a,i,w,best,ok,tot;
+  function gen(){a=Array.from({length:9},()=>1+Math.floor(Math.random()*9));w=a[0]+a[1]+a[2];best=w;i=k;ok=0;tot=0;draw("",0);}
+  function draw(msg,hi){
+    const fin=i>=a.length;
+    $("#lab").innerHTML=`<section class="card" id="swc">
+      <p class="muted small" style="margin:0">Find the max sum of any ${k} neighbours. Predict each slide before it happens.</p>
+      <div class="cells">${a.map((v,j)=>{let c="";if(j>=i-k&&j<i)c="win";if(!fin&&j===i-k)c="win out";if(!fin&&j===i)c="in";return `<div class="cellw"><div class="cell ${c}">${v}</div><div class="ptr">${!fin&&j===i?'<span class="L">+</span>':""}${!fin&&j===i-k?'<span class="R">−</span>':""}</div></div>`;}).join("")}</div>
+      <div class="win-sum"><span>Window <b>${w}</b></span><span>Best <b>${best}</b></span></div>
+      ${codeBlock(SWCODE,false,hi)}
+      <div class="msg">${msg}</div>
+      ${fin?`<p class="prompt"><b>Max sum is ${best}.</b><br>You predicted ${ok} of ${tot} slides correctly, and each slide cost O(1) instead of re-adding ${k} numbers.</p><button class="primary block" id="nw">New array</button>`
+      :`<p class="prompt">Slide right: add <b class="good">${a[i]}</b>, drop <b class="bad">${a[i-k]}</b>.<br>Will the new sum beat ${best}?</p>
+        <div class="opts grid2"><button class="opt" id="y">Yes</button><button class="opt" id="n">No</button></div>`}
+    </section>`;
+    if(fin){$("#nw").onclick=gen;}else{$("#y").onclick=()=>pred(true);$("#n").onclick=()=>pred(false);}
+  }
+  function pred(yes){
+    const add=a[i],drop=a[i-k],nw=w+add-drop,beats=nw>best,right=yes===beats;
+    tot++;if(right)ok++;
+    const prev=best;w=nw;if(beats)best=nw;i++;
+    const text=`${w-add+drop} + ${add} − ${drop} = ${nw}, ${beats?`which beats ${prev}`:`which does not beat ${prev}`}.`;
+    if(i>=a.length){bumpStreak();S.pr["Sliding Window"]=Math.max(600,S.pr["Sliding Window"]+Math.round(ok/tot*12)-3);save();}
+    draw(`<span class="${right?"good":"bad"}">${right?"✓":"✗"} ${text}</span>`,beats?3:2);
+    if(!right)$("#swc").classList.add("shake");
+  }
+  gen();
+}
+
+go(Home);
+</script>
+</body>
+</html>
